@@ -21,10 +21,20 @@ import argparse
 import datetime as dt
 import json
 import pathlib
-import sys
-from typing import Any, Dict, List, Mapping, Optional
+import re as _re
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from common import REPORT_BANNER, REPORT_TYPE, json_dumps, load_json_file, print_json
+from common import (
+    REPORT_BANNER,
+    REPORT_TYPE,
+    attach_pagination,
+    call_tool_once,
+    collect_detail_pages,
+    json_dumps,
+    load_json_file,
+    paid_call_scope,
+    print_json,
+)
 import mcp_client
 from render_report import render_html, render_markdown, html_to_pdf
 
@@ -50,6 +60,8 @@ def _is_api_error(value: Any) -> bool:
     if isinstance(value, str):
         return any(s in value for s in ("接口调用失败", "查询失败", "状态码：4", "状态码：5"))
     if isinstance(value, dict):
+        if value.get("_mcp_error") or value.get("_error") or value.get("isError") is True or value.get("error"):
+            return True
         for v in value.values():
             if isinstance(v, str) and any(s in v for s in ("接口调用失败", "查询失败", "状态码：4", "状态码：5")):
                 return True
@@ -61,19 +73,21 @@ def _first_list(value: Any) -> List[Any]:
     if isinstance(value, dict):
         if _is_api_error(value):
             return []
+        if set(value) <= {"text", "error", "code", "_error", "_mcp_error"}:
+            return []
         for key in ("resultList", "list", "items", "data"):
             if isinstance(value.get(key), list):
                 return value[key]
     if value in (None, "", {}):
         return []
-    return [value]
+    return []
 
 
 def _first_record(value: Any) -> Dict[str, Any]:
     for record in _first_list(value):
         if isinstance(record, dict):
             return record
-    if isinstance(value, dict):
+    if isinstance(value, dict) and not _is_api_error(value):
         return value
     return {}
 
@@ -100,7 +114,7 @@ def _int(value: Any) -> Optional[int]:
 
 def _safe_call(tool: str, arguments: Dict[str, Any]) -> Any:
     try:
-        result = mcp_client.call_tool(tool, arguments)
+        result = call_tool_once(mcp_client.call_tool, tool, arguments)
         # Detect API error responses (405, etc.) and return error marker
         if _is_api_error(result):
             return {"_error": "API错误", "_raw": result}
@@ -117,12 +131,22 @@ def _safe_total(payload: Any) -> Any:
     return None
 
 
+def _payload_status(payload: Any) -> str:
+    if _is_api_error(payload):
+        return "error"
+    if isinstance(payload, dict) and str(payload.get("text") or "").strip() == "查询数据为空":
+        return "empty"
+    if _first_list(payload) or _safe_total(payload) is not None:
+        return "success" if (_first_list(payload) or _safe_total(payload) not in (0, "0")) else "empty"
+    if isinstance(payload, dict) and payload:
+        return "success"
+    return "empty"
+
+
 def _join_list(value: Any) -> str:
     items = _first_list(value)
     return "、".join(_text(t) for t in items if t) if items else ""
 
-
-import re as _re
 
 def _parse_cert_list(value: Any) -> List[str]:
     """Parse a messy managementSystemCertification field into discrete certs.
@@ -165,11 +189,56 @@ def _concentration(rows: List[Mapping[str, Any]], name_key: str, value_key: str,
     return {"top": items[0][0], "top_share": items[0][1] / total * 100, "cr": cr, "total": total, "n": len(items)}
 
 
-def _address_text(value: Any) -> str:
+def _merge_address_parts(values: Sequence[Any]) -> str:
+    """Join address fields without duplicating identical/prefix-overlapping regions."""
+    parts: List[str] = []
+    for raw in values:
+        value = _text(raw)
+        if not value or value in parts:
+            continue
+        joined = "".join(parts)
+        if joined and value.startswith(joined):
+            parts = [value]
+        elif joined.startswith(value):
+            continue
+        elif value.endswith(("省", "市", "区", "县")) and value in joined:
+            continue
+        elif parts and value.startswith(parts[-1]):
+            parts[-1] = value
+        else:
+            parts.append(value)
+    return "".join(parts)
+
+
+def _profile_address(value: Any) -> tuple[str, str, str]:
+    """Preserve factory profile address evidence without claiming normalization."""
     if isinstance(value, dict):
-        parts = [value.get("province"), value.get("city"), value.get("district"), value.get("value")]
-        return "".join(_text(p) for p in parts if p)
-    return _text(value)
+        source_parts = []
+        for key in ("province", "city", "district", "value"):
+            raw_part = value.get(key)
+            readable_part = "-" if raw_part in (None, "") else _text(raw_part)
+            source_parts.append(f"{key}={readable_part}")
+        raw_source = "；".join(source_parts)
+        admin_parts = [_text(value.get(key)) for key in ("province", "city", "district")]
+        admin_parts = [part for part in admin_parts if part]
+        detail = _text(value.get("value"))
+        overlaps = [part for part in admin_parts if detail and part in detail]
+        repeated = [part for part in overlaps if detail.count(part) > 1]
+        if detail and overlaps:
+            address = detail
+            note = (
+                "上游 value 原文含重复行政区片段；报告保留 value 原文，未做地理校验。"
+                if repeated
+                else "上游 value 与省市区层级字段重叠；报告优先展示 value 原文，未做地理校验。"
+            )
+        else:
+            address = _merge_address_parts([*admin_parts, detail])
+            note = "按上游省市区与 value 字段保守拼接；未做地理校验。"
+        return address, raw_source, note
+    raw_text = _text(value)
+    if not raw_text:
+        return "", "", ""
+    return raw_text, raw_text, "上游仅返回单一地址原文；报告不清洗其中潜在重复，未做地理校验。"
 
 
 def _reg_capital_text(value: Any) -> str:
@@ -292,7 +361,7 @@ def _derive_core_metrics(metrics: List[Dict[str, Any]], core: Mapping[str, Any])
             metrics.append({"label": "工厂类型", "value": str(factory_type), "hint": "工厂类型分类"})
         risk = profile.get("账期风险")
         if risk and str(risk) not in ("-", "", "None"):
-            metrics.append({"label": "账期风险", "value": str(risk), "hint": "账期风险评估等级"})
+            metrics.append({"label": "账期风险", "value": str(risk), "hint": "上游返回的账期风险指标"})
     if isinstance(caps, dict) and caps:
         cert_count = caps.get("管理体系认证数")
         if cert_count and str(cert_count) not in ("-", "", "0", "None"):
@@ -344,13 +413,51 @@ def build_metrics(profile: Mapping[str, Any], capabilities: Mapping[str, Any], p
     return [m for m in metrics if m.get("value") not in ("", None, "-")]
 
 
-def build_caliber(subject: Mapping[str, Any]) -> Dict[str, Any]:
+def _capability_kinds(capabilities: Mapping[str, Any]) -> Dict[str, bool]:
+    production_keys = {
+        "生产线数", "月产值", "打版人数", "检验人数", "是否支持打样", "工厂工艺", "主要设备",
+    }
+    return {
+        "production": any(key in capabilities for key in production_keys),
+        "certification": any(key in capabilities for key in ("管理体系认证", "生产质量认证")),
+        "identity": "企业平台/身份认证" in capabilities,
+    }
+
+
+def build_caliber(subject: Mapping[str, Any], core: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+    if subject.get("mode") == "search":
+        return {
+            "match_target": subject.get("match_raw"),
+            "match_type": f"工厂检索模式（keywordType={subject.get('keywordType')}，address={subject.get('address') or []}）",
+            "data_scope": "工厂检索本次采集候选样本",
+            "products": ["工厂检索"],
+            "limit": "地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。",
+        }
+    ca = core if isinstance(core, Mapping) else {}
+    profile_value = ca.get("factory_profile")
+    capabilities_value = ca.get("factory_capabilities")
+    product_stats_value = ca.get("product_stats")
+    profile: Dict[str, Any] = profile_value if isinstance(profile_value, dict) else {}
+    capabilities: Dict[str, Any] = capabilities_value if isinstance(capabilities_value, dict) else {}
+    product_stats: List[Any] = product_stats_value if isinstance(product_stats_value, list) else []
+    kinds = _capability_kinds(capabilities)
+    scopes: List[str] = []
+    if profile:
+        scopes.append("工厂概况与上游风险指标")
+    if kinds["production"]:
+        scopes.append("上游生产相关字段")
+    if kinds["certification"]:
+        scopes.append("管理体系/质量认证字段")
+    if kinds["identity"]:
+        scopes.append("平台身份信息线索")
+    if product_stats:
+        scopes.append("工厂产品类目统计")
     return {
         "match_target": subject.get("enterprise") or subject.get("match_raw"),
         "match_type": f"工厂概况按企业主体匹配（keywordType={subject.get('keywordType', 'name')}）；工厂检索支持工厂名称/主营产品/产品名称等关键词",
-        "data_scope": "工厂概况与风险、工厂产能（产线/人员/设备/质检）、工厂产品统计、工厂检索明细",
-        "products": ["工厂概况", "工厂产能", "工厂产品统计", "工厂检索"],
-        "limit": "数据来自工厂公开信息与供应商数据库；少量字段可能存在更新延迟。",
+        "data_scope": "、".join(scopes) if scopes else "本次未返回有效工厂字段",
+        "products": scopes,
+        "limit": "仅呈现上游实际返回字段与信息线索；规模、认证、平台身份及类目标签均需结合原始材料独立核验，不直接证明产能、质量、准入或合作适配。",
     }
 
 
@@ -395,9 +502,11 @@ def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, A
         profile_kv["成立时间"] = _text(p.get("foundTime"))
     if p.get("factoryScale"):
         profile_kv["工厂规模"] = _text(p.get("factoryScale"))
-    addr = _address_text(p.get("factoryAddress"))
+    addr, addr_source, addr_note = _profile_address(p.get("factoryAddress"))
     if addr:
         profile_kv["工厂地址"] = addr
+        profile_kv["工厂地址原始字段"] = addr_source
+        profile_kv["工厂地址说明"] = addr_note
     cap = _reg_capital_text(p.get("regCapital"))
     if cap:
         profile_kv["注册资本"] = cap
@@ -433,7 +542,7 @@ def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, A
         capabilities_kv["管理体系认证"] = cert
     ec = _join_list(c.get("enterpriseCertification"))
     if ec:
-        capabilities_kv["生产质量认证"] = ec
+        capabilities_kv["企业平台/身份认证"] = ec
     device_list = _first_list(c.get("mainDeviceList"))
     if device_list:
         capabilities_kv["主要设备"] = "；".join(
@@ -457,22 +566,49 @@ def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, A
     for item in _first_list(search):
         if not isinstance(item, dict):
             continue
+        address_values = []
+        address_sources: Dict[str, Any] = {}
+        for key in ("province", "city", "district", "address", "addressValue"):
+            value = _text(item.get(key))
+            if value:
+                address_values.append(value)
+                address_sources[key] = value
+        factory_address_value = item.get("factoryAddress")
+        factory_address: Dict[str, Any] = factory_address_value if isinstance(factory_address_value, dict) else {}
+        for key in ("province", "city", "district", "value"):
+            value = _text(factory_address.get(key))
+            if value:
+                address_values.append(value)
+                address_sources[f"factoryAddress.{key}"] = value
         search_rows.append({
             "企业名称": _text(item.get("name")) or "-",
             "主营产品": _join_list(item.get("mainProducts")) or "-",
             "注册资本": _reg_capital_text(item.get("regCapital")) or "-",
             "成立日期": _text(item.get("foundTime")) or "-",
+            "地区/地址": _merge_address_parts(address_values) or "上游未返回（不可逐条复核）",
+            "地址来源字段": address_sources,
         })
+
+    capability_kinds = _capability_kinds(capabilities_kv)
+    if capability_kinds["production"]:
+        capability_title = "生产相关字段"
+        capability_note = "上游返回的产线/人员/设备/质检等字段；仅作字段展示，不直接证明产能或履约能力"
+    elif capability_kinds["certification"]:
+        capability_title = "认证与平台字段"
+        capability_note = "上游返回的认证与平台字段，需结合证书或平台原始记录独立核验"
+    else:
+        capability_title = "平台身份信息线索"
+        capability_note = "上游返回的平台/身份字段，仅作信息线索，不代表生产或质量能力"
 
     sections = [
         {"key": "factory_profile", "title": "工厂概况", "kind": "kv"},
-        {"key": "factory_capabilities", "title": "工厂产能", "kind": "kv", "note": "产线/人员/设备/质检等生产实力指标"},
+        {"key": "factory_capabilities", "title": capability_title, "kind": "kv", "note": capability_note},
         {"key": "product_stats", "title": "工厂产品类目分布", "kind": "donut", "note": product_rows_note,
          "chart": {"name": "产品类目", "value": "数量"},
          "columns": [("产品类目", "产品类目"), ("数量", "数量")]},
         {"key": "search_records", "title": "工厂检索明细", "kind": "table",
-         "note": f"本次检索命中 {total if total is not None else '若干'} 条，展示前 {len(product_rows)} 条",
-         "columns": [("企业名称", "企业名称"), ("主营产品", "主营产品"), ("注册资本", "注册资本"), ("成立日期", "成立日期")]},
+         "note": f"本次检索命中 {total if total is not None else '未知'} 条，展示前 {len(search_rows)} 条",
+         "columns": [("企业名称", "企业名称"), ("主营产品", "主营产品"), ("地区/地址", "地区/地址"), ("注册资本", "注册资本"), ("成立日期", "成立日期")]},
     ]
 
     return {
@@ -486,6 +622,12 @@ def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, A
         "product_category_total": _sum_product_category_values(ps),
         "management_certs": cert_list,
         "account_period_risk": _text(p.get("accountPeriodRisk")),
+        "source_status": {
+            "factory_profile": _payload_status(profile),
+            "factory_capabilities": _payload_status(capabilities),
+            "product_stats": _payload_status(product_stats),
+            "factory_search": _payload_status(search),
+        },
     }
 
 
@@ -497,13 +639,30 @@ def build_records(core: Mapping[str, Any]) -> List[Dict[str, Any]]:
             "主营产品": item.get("主营产品") or "-",
             "注册资本": item.get("注册资本") or "-",
             "成立日期": item.get("成立日期") or "-",
+            "地区/地址": item.get("地区/地址") or "-",
         })
     return out[:20]
 
 
-def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]]) -> List[Dict[str, Any]]:
     insights: List[Dict[str, Any]] = []
     metric_map = {m["label"]: str(m["value"]) for m in metrics}
+    if subject.get("mode") == "search":
+        rows = core.get("search_records") or []
+        if rows:
+            auditable = sum(1 for row in rows if row.get("地区/地址") not in (None, "", "-", "上游未返回（不可逐条复核）"))
+            insights.append({
+                "feature": "工厂检索本次采集样本",
+                "evidence": f"本次采集返回 {len(rows)} 条候选记录，其中 {auditable} 条含可逐条复核的地区/地址字段；请求地区={subject.get('address') or []}。",
+                "interpretation": "结果仅是上游按关键词与地区筛选的候选样本；缺少地址字段的记录不能在报告内独立复核地区，也不等同于已审核供应商。",
+            })
+        else:
+            insights.append({
+                "feature": "工厂检索数据状态",
+                "evidence": "本次检索未返回有效候选记录。",
+                "interpretation": "空结果与调用错误应结合 source_status 区分，不推断区域内不存在相关工厂。",
+            })
+        return insights
     profile_kv = core.get("factory_profile") or {}
     cap_kv = core.get("factory_capabilities") or {}
 
@@ -511,7 +670,7 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
         insights.append({
             "feature": "工厂规模",
             "evidence": f"工厂规模为“{profile_kv.get('工厂规模')}”。",
-            "interpretation": "工厂规模反映企业产能基础，是供应商评估与采购决策的重要参考。",
+            "interpretation": "该值是上游返回的工厂规模标签；不直接证明实际产能、交付能力或采购适配。",
         })
     lines = metric_map.get("生产线数")
     brand = metric_map.get("服务品牌数")
@@ -529,7 +688,7 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
         insights.append({
             "feature": "生产实力",
             "evidence": ev + "。",
-            "interpretation": "生产线数量是衡量工厂生产能力与交付能力的核心指标，结合品牌均摊可评估柔性制造与多客户并行交付能力。",
+            "interpretation": "该项仅描述上游返回的生产线数量；未结合设备状态、班次、稼动率与订单数据，不外推产能或交付能力。",
         })
     if brand and product:
         try:
@@ -539,32 +698,38 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
             insights.append({
                 "feature": "产品布局",
                 "evidence": f"服务品牌 {brand} 个、主营产品 {product} 项，产品/品牌比 {ratio:.1f}。",
-                "interpretation": "产品/品牌比反映工厂的 SKU 广度：比值高通常意味着代工多品类、定制化能力强；比值低则代表专一品类规模化生产。",
+                "interpretation": "该比值仅由上游服务品牌数与主营产品数计算，不直接证明定制化、代工或规模化生产能力。",
             })
         except (TypeError, ValueError):
             pass
     elif brand or product:
-        ev = []
+        layout_evidence: List[str] = []
         if brand:
-            ev.append(f"服务品牌 {brand} 个")
+            layout_evidence.append(f"服务品牌 {brand} 个")
         if product:
-            ev.append(f"主营产品 {product} 项")
+            layout_evidence.append(f"主营产品 {product} 项")
         insights.append({
             "feature": "产品布局",
-            "evidence": "、".join(ev) + "。",
-            "interpretation": "服务品牌数与主营产品数反映工厂的产品结构与市场定位，结合类目分布可洞察业务集中度。",
+            "evidence": "、".join(layout_evidence) + "。",
+            "interpretation": "以上仅为上游返回的数量字段；字段缺失或分类不足时，不外推产品结构、市场定位或生产能力。",
         })
     product_rows = core.get("product_stats") or []
     if product_rows:
         conc = _concentration(product_rows, "产品类目", "数量", 2)
         if conc:
-            insights.append({
-                "feature": "产品类目集中度",
-                "evidence": f"“{conc['top']}”类目占比约 {conc['top_share']:.0f}%，前 2 类目合计 {conc['cr']:.0f}%（CR2）。",
-                "interpretation": "类目集中度反映业务聚焦：CR2 偏高意味着以少数核心品类为主、产能专业化；CR2 偏低则代表多品类分散布局、抗周期能力较强。",
-            })
+            if len(product_rows) == 1 and str(conc["top"]) == "其他":
+                insights.append({
+                    "feature": "产品类目统计范围",
+                    "evidence": f"上游产品类目统计仅返回单一“其他”类目，数量 {int(conc['total'])}。",
+                    "interpretation": "单一兜底类目不具备结构区分度，不能据此计算有业务意义的集中度，也不能推出实际生产特征、品类布局或周期韧性。",
+                })
+            else:
+                insights.append({
+                    "feature": "产品类目样本分布",
+                    "evidence": f"“{conc['top']}”类目占比约 {conc['top_share']:.0f}%，前 2 类目合计 {conc['cr']:.0f}%（CR2）。",
+                    "interpretation": "该比例仅描述上游已分类记录的当前分布；不直接证明实际生产特征、品类布局或周期韧性。",
+                })
     qc_staff = cap_kv.get("检验人数")
-    patterning = cap_kv.get("打版人数")
     if lines and qc_staff:
         try:
             ln = float(lines)
@@ -573,39 +738,31 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
                 insights.append({
                     "feature": "质检配置",
                     "evidence": f"生产线 {lines} 条对应质检 {qc_staff} 人，约 {qc / ln:.1f} 人/线。",
-                    "interpretation": "质检人线比反映品质管控密度：比值越高代表品控投入越重，是高客单价/出口订单准入的关键参考。",
+                    "interpretation": "该比值仅由上游人数与生产线字段计算；未包含岗位职责、班次或检验流程，不推断品控强度或订单准入能力。",
                 })
         except (TypeError, ValueError):
             pass
     if cap_kv.get("管理体系认证") or cap_kv.get("生产质量认证"):
-        ev = []
+        cert_evidence: List[str] = []
         if cap_kv.get("管理体系认证"):
-            ev.append(cap_kv.get("管理体系认证"))
+            cert_evidence.append(str(cap_kv.get("管理体系认证")))
         if cap_kv.get("生产质量认证"):
-            ev.append(cap_kv.get("生产质量认证"))
+            cert_evidence.append(str(cap_kv.get("生产质量认证")))
         cert_count = cap_kv.get("管理体系认证数")
         cert_clause = f"（管理体系认证 {cert_count} 项）" if cert_count else ""
         insights.append({
             "feature": "资质认证",
-            "evidence": "持有认证：" + "、".join(ev) + cert_clause + "。",
-            "interpretation": "体系与质量认证体现工厂的规范化管理水平，是采购方准入与风险控制的关键依据。",
+            "evidence": "持有认证：" + "、".join(cert_evidence) + cert_clause + "。",
+            "interpretation": "以上仅为上游返回的认证名称字段，需独立核验有效证书、范围与期限；不得替代质量核验、业务审核或风险判断。",
         })
     # 账期风险等级（来源：factory_profile.accountPeriodRisk）
     account_risk = core.get("account_period_risk") or profile_kv.get("账期风险")
     if account_risk:
         risk_norm = account_risk.strip()
-        if risk_norm == "低":
-            level, advice = "采购友好", "账期风险低意味着付款条件相对宽松、回款压力小，对采购方而言合作成本与资金占用风险较低，适合长期稳定合作。"
-        elif risk_norm == "中":
-            level, advice = "需关注", "账期风险中等，建议结合订单规模与结算周期动态评估，合理设置预付款/里程碑付款比例以平衡双方现金流。"
-        elif risk_norm == "高":
-            level, advice = "风险", "账期风险高提示供应商资金链或回款存在压力，建议缩短账期、提高预付比例并加强履约监控，防范交付与质量风险。"
-        else:
-            level, advice = risk_norm, "账期风险等级反映付款条件与资金压力，建议结合实际结算条款评估合作风险。"
         insights.append({
             "feature": "账期风险等级",
-            "evidence": f"账期风险等级为“{risk_norm}”（{level}）。",
-            "interpretation": advice,
+            "evidence": f"上游账期风险指标为“{risk_norm}”。",
+            "interpretation": "该值仅按上游指标原样展示，不等同于交易事实，不能推出付款条款、回款压力、资金占用、履约表现或长期合作适配。",
         })
     # 数据覆盖度提示：主营产品数远大于已分类类目总量
     main_pc = core.get("main_product_count")
@@ -626,13 +783,38 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
     return insights
 
 
-def build_abstract(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List[Mapping[str, Any]]) -> str:
+def build_abstract(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]]) -> str:
     name = subject.get("enterprise") or subject.get("match_raw") or "目标企业"
-    parts = [f"本报告以“{name}”为分析对象，基于工厂公开信息，系统呈现企业工厂概况与风险、生产实力（产线/人员/设备/质检）以及工厂产品统计。"]
+    if subject.get("mode") == "search":
+        rows = core.get("search_records") or []
+        return (
+            f"本报告以“{name}”为工厂检索关键词，按 keywordType={subject.get('keywordType')}、地区={subject.get('address') or []} 查询。"
+            f"本次采集候选样本 {len(rows)} 条；只呈现检索记录与可复核字段，不声称已获得企业工厂概况、产能或产品统计。"
+        )
+    profile_value = core.get("factory_profile")
+    capabilities_value = core.get("factory_capabilities")
+    product_stats_value = core.get("product_stats")
+    profile: Dict[str, Any] = profile_value if isinstance(profile_value, dict) else {}
+    capabilities: Dict[str, Any] = capabilities_value if isinstance(capabilities_value, dict) else {}
+    product_stats: List[Any] = product_stats_value if isinstance(product_stats_value, list) else []
+    kinds = _capability_kinds(capabilities)
+    covered: List[str] = []
+    if profile:
+        covered.append("工厂概况与上游风险指标")
+    if kinds["production"]:
+        covered.append("生产相关字段")
+    if kinds["certification"]:
+        covered.append("管理体系认证字段")
+    if kinds["identity"]:
+        covered.append("平台身份信息线索")
+    if product_stats:
+        covered.append("产品类目统计")
+    coverage_text = "、".join(covered) if covered else "未返回有效工厂字段"
+    parts = [f"本报告以“{name}”为分析对象，仅按实际非空结果呈现：{coverage_text}。"]
     if metrics:
         kv = "、".join(f"{m['label']} {m['value']}" for m in metrics[:5])
         parts.append(f"关键指标包括：{kv}。")
-    parts.append("报告同时给出工厂规模、生产实力、产品布局与资质认证的结构化解读，便于供应商评估、采购决策与供应链风险管理参考。")
+    parts.append("报告仅对上游字段与信息线索作描述；缺失维度不作成功叙述，规模、认证、平台身份和类目标签不直接证明产能、质量或合作适配。")
     return "".join(parts)
 
 
@@ -657,14 +839,20 @@ def build_dry_run_payload(raw: str, keyword_type: str) -> Dict[str, Any]:
 # Assembly
 # --------------------------------------------------------------------------- #
 
-def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List[Mapping[str, Any]], *, dry_run: bool) -> Dict[str, Any]:
+def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]], *, dry_run: bool) -> Dict[str, Any]:
     abstract = build_abstract(subject, core, metrics)
     records = build_records(core)
     insights = build_insights(subject, core, metrics)
     # Quality gate: count populated core-analysis sections.
     ca = core if isinstance(core, dict) else {}
+    status_value = ca.get("source_status")
+    statuses: Dict[str, Any] = status_value if isinstance(status_value, dict) else {}
+    requested = [value for value in statuses.values() if value != "not_requested"]
     secs = ca.get("sections", [])
-    if secs:
+    if requested:
+        total_secs = len(requested)
+        populated = sum(1 for value in requested if value == "success")
+    elif secs:
         total_secs = len(secs)
         populated = sum(1 for s in secs if isinstance(s, dict) and ca.get(s.get("key")) not in (None, "", [], {}))
     else:
@@ -679,7 +867,11 @@ def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List
     if populated == 0:
         import sys
         print("⚠️ 质量门禁警告: 所有核心分析维度均无数据", file=sys.stderr)
-    title = f"{subject.get('enterprise') or '目标企业'} 工厂信息分析报告"
+    title = (
+        f"{subject.get('enterprise') or '目标关键词'} 工厂检索样本报告"
+        if subject.get("mode") == "search"
+        else f"{subject.get('enterprise') or '目标企业'} 工厂信息分析报告"
+    )
     return {
         "report_type": REPORT_TYPE,
         "title": title,
@@ -689,25 +881,26 @@ def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List
         "summary": abstract,
         "executive_summary": [item["interpretation"] for item in insights][:5] or [abstract[:120]],
         "metrics": list(metrics),
-        "caliber": build_caliber(subject),
+        "caliber": build_caliber(subject, core),
         "core_analysis": dict(core),
         "representative_records": records,
         "insights": insights,
         "data_source": {
             "mcp_server": "factory-insight-mcp-server",
-            "products": [
+            "products": ([{"name": "工厂检索", "product_id": "66aa4eac4bb1f40b86c46efe"}] if subject.get("mode") == "search" else [
                 {"name": "工厂概况", "product_id": "66aa4eac4bb1f40b86c46f0b"},
                 {"name": "工厂产能", "product_id": "66aa4eac4bb1f40b86c46ee6"},
                 {"name": "工厂产品统计", "product_id": "6725e5b9ba65854594baebd2"},
-                {"name": "工厂检索", "product_id": "66aa4eac4bb1f40b86c46efe"},
-            ],
+            ]),
             "generated_at": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
             "dry_run": dry_run,
             "quality_report": quality_report,
+            "source_status": core.get("source_status", {}),
         },
     }
 
 
+@paid_call_scope
 def build_payload_enterprise(raw: str, keyword_type: str, page_size: int) -> Dict[str, Any]:
     resolved = resolve_enterprise_name(raw)
     enterprise = resolved["enterprise"]
@@ -717,6 +910,7 @@ def build_payload_enterprise(raw: str, keyword_type: str, page_size: int) -> Dic
     product_stats = _safe_call(T_PRODUCT_STATS, mk_args)
     subject = build_subject(raw, resolved, keyword_type)
     core = build_core_analysis(profile, capabilities, product_stats, None)
+    core["source_status"]["factory_search"] = "not_requested"
     metrics = build_metrics(profile if isinstance(profile, dict) else {},
                             capabilities if isinstance(capabilities, dict) else {},
                             product_stats if isinstance(product_stats, dict) else {},
@@ -738,17 +932,21 @@ def _parse_addresses(address_args: List[str]) -> List[List[str]]:
     return out
 
 
-def build_payload_search(keyword: str, keyword_type: str, addresses: List[List[str]], page_size: int) -> Dict[str, Any]:
+@paid_call_scope
+def build_payload_search(keyword: str, keyword_type: str, addresses: List[List[str]], page_size: int, max_pages: int = 1) -> Dict[str, Any]:
+    if isinstance(max_pages, bool) or not isinstance(max_pages, int) or max_pages < 1:
+        raise ValueError("max_pages 必须为正整数")
     mk = (keyword or "").strip()
     resolved = {"keyword": mk, "enterprise": mk, "resolved": True, "reason": "工厂检索模式：按关键词直查"}
     search_args: Dict[str, Any] = {
         "matchKeyword": mk,
         "keywordType": keyword_type,
-        "pageIndex": 1,
         "pageSize": min(page_size, 10) if page_size else 10,
         "address": addresses,
     }
-    search = _safe_call(T_FACTORY_SEARCH, search_args)
+    search = collect_detail_pages(_safe_call, T_FACTORY_SEARCH, search_args,
+                                  get_rows=_first_list, get_total=_safe_total, is_error=_is_api_error,
+                                  max_pages=max_pages)
     search_total = _safe_total(search) if isinstance(search, dict) else None
     subject = {
         "enterprise": mk,
@@ -761,16 +959,23 @@ def build_payload_search(keyword: str, keyword_type: str, addresses: List[List[s
         "address": addresses,
     }
     core = build_core_analysis({}, {}, {}, search)
+    core["source_status"].update({
+        "factory_profile": "not_requested",
+        "factory_capabilities": "not_requested",
+        "product_stats": "not_requested",
+    })
     metrics = build_metrics({}, {}, {}, search_total)
     # --- Enterprise profile enrichment (from fuzzy_search) ---
     _enrich_metrics_with_profile(metrics, resolved.get("record") if isinstance(resolved, dict) else None)
     _derive_core_metrics(metrics, core if isinstance(core, dict) else {})
-    return _assemble(subject, core, metrics, dry_run=False)
+    return attach_pagination(_assemble(subject, core, metrics, dry_run=False), {"工厂检索": search})
 
 
-def build_payload(raw: str, keyword_type: str, page_size: int, *, mode: str, addresses: List[List[str]]) -> Dict[str, Any]:
+def build_payload(raw: str, keyword_type: str, page_size: int, *, mode: str, addresses: List[List[str]], max_pages: int = 1) -> Dict[str, Any]:
+    if isinstance(max_pages, bool) or not isinstance(max_pages, int) or max_pages < 1:
+        raise ValueError("max_pages 必须为正整数")
     if mode == "search":
-        return build_payload_search(raw, keyword_type, addresses, page_size)
+        return build_payload_search(raw, keyword_type, addresses, page_size, max_pages)
     return build_payload_enterprise(raw, keyword_type, page_size)
 
 
@@ -786,6 +991,7 @@ def main() -> None:
     parser.add_argument("--keyword-type", default="name", help="主体类型：name/nameId/regNumber/socialCreditCode（企业模式）；工厂检索模式可为 综合搜索/工厂名称/主营产品/产品名称")
     parser.add_argument("--address", action="append", default=[], help="工厂检索地区，可重复；格式“省”或“省,市”，例如 --address 广东省 --address 广东省,潮州市")
     parser.add_argument("--page-size", type=int, default=10, help="明细分页大小（企业模式最多 50；工厂检索模式最多 10）")
+    parser.add_argument("--max-pages", type=int, default=1, help="工厂检索明细翻页预算上限，默认 1；按 total 驱动翻页，超出预算披露未纳入条数而非宣称全量")
     parser.add_argument("--dry-run", action="store_true", help="不调用真实 MCP，使用样例数据组装报告骨架")
     parser.add_argument("--output", help="输出 JSON 路径；省略则打印到 stdout")
     parser.add_argument("--report-output", help="同时输出 HTML 报告（.html）与 Markdown 报告（.md）")
@@ -805,10 +1011,13 @@ def main() -> None:
         keyword_type = args.keyword_type
         addresses = []
 
+    if args.max_pages is not None and args.max_pages < 1:
+        raise SystemExit("--max-pages 必须为正整数")
+
     if args.dry_run:
         payload = build_dry_run_payload(raw, args.keyword_type)
     else:
-        payload = build_payload(raw, keyword_type, args.page_size, mode=mode, addresses=addresses)
+        payload = build_payload(raw, keyword_type, args.page_size, mode=mode, addresses=addresses, max_pages=args.max_pages)
 
     if args.output:
         out = pathlib.Path(args.output).expanduser()

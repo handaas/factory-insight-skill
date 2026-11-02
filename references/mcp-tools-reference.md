@@ -10,7 +10,7 @@
 
 - `keywordType` 枚举（详情工具）：`name`（企业名称）/ `nameId`（企业 id）/ `regNumber`（注册号）/ `socialCreditCode`（统一社会信用代码）。
 - `factory_insight_factory_search` 的 `keywordType` 枚举：`综合搜索` / `工厂名称` / `主营产品` / `产品名称`。
-- 分页：`pageIndex` 从 1 开始；详情工具单页最多 50，`factory_insight_factory_search` 单页最多 10。
+- 分页仅适用于 schema 含 `pageIndex`/`pageSize` 的两个工具（`pageIndex` 从 1 开始）：`factory_insight_fuzzy_search` 单页最多 50（本 skill 仅用于身份解析，pageSize=1）；`factory_insight_factory_search` 单页最多 10（默认 10）。详情工具（profile / capabilities / product_stats）返回 KV/聚合结构，按工具参数表不含分页参数，单次调用、不分页。
 - `factory_insight_factory_search` 的 `address` 必填，格式为双层列表：`[["广东省"],["广东省","潮州市"]]`，每个子列表表示一个地区（省份或省市）。
 
 ---
