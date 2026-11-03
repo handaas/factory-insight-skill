@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "skill": "factory-insight-skill",
+  "case_id": "09-chaozhou-ceramic-product-candidates",
+  "title": "潮州陶瓷候选产品核查",
+  "invocation_id": "1793069084986517000",
+  "provenance": {
+    "integrator_id": "683e574805537ace146cc05e",
+    "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+    "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+    "scenario_sha256": "72a6e37dd944b5a8f87310f907f2717eb106bc7d2f0520398e462baa932073ed",
+    "skill_source_hashes": {
+      "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+      "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+      "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+      "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+      "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+    },
+    "upstream_source_hashes": {
+      "factory-insight-mcp-server": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+    },
+    "upstream_dependency_hashes": {
+      "factory-insight-mcp-server/server/mcp_server.py": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+    }
+  },
+  "source_changed_during_run": false,
+  "started_at": "2026-10-27T10:44:45+08:00",
+  "elapsed_seconds": 3.296,
+  "returncode": 0,
+  "exception_type": null,
+  "command": "python3 factory-insight-skill/scripts/compose_report.py --search '陶瓷' --keyword-type '主营产品' --address '广东省,潮州市' --page-size 10 --output factory-insight-skill/output/live-replaced-20261027/09-chaozhou-ceramic-product-candidates/report.json --report-output factory-insight-skill/output/live-replaced-20261027/09-chaozhou-ceramic-product-candidates/report.html",
+  "transport": "local MCP servers via loopback streamable-http",
+  "cache_used": false,
+  "call_count": 1,
+  "successful_data_calls": 1,
+  "empty_calls": 0,
+  "failed_calls": 0,
+  "checks": {
+    "issues": [],
+    "warnings": [],
+    "coverage_pct": 100,
+    "subject": {
+      "enterprise": "陶瓷",
+      "matchKeyword": "陶瓷",
+      "keywordType": "主营产品",
+      "match_raw": "陶瓷",
+      "resolved": true,
+      "resolve_reason": "工厂检索模式：按关键词直查",
+      "mode": "search",
+      "address": [
+        [
+          "广东省",
+          "潮州市"
+        ]
+      ]
+    },
+    "title": "陶瓷 工厂检索样本报告",
+    "data_mode": null,
+    "metrics": [
+      {
+        "label": "检索结果",
+        "value": "3746",
+        "hint": "工厂检索命中数"
+      }
+    ],
+    "quality_report": {
+      "total_sections": 1,
+      "populated_sections": 1,
+      "empty_sections": 0,
+      "coverage_pct": 100
+    },
+    "unregistered_tools": [],
+    "checks": {
+      "json_html_markdown": true,
+      "explicit_live": true,
+      "tool_calls_recorded": 1,
+      "offline_scripts": true,
+      "independent_rerender": true,
+      "offline_browser": true
+    }
+  },
+  "status": "passed",
+  "source_hashes": {
+    "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+    "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+    "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+    "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+    "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+  },
+  "technical_status": "passed",
+  "audited_at": "2026-10-27T11:13:00+08:00",
+  "evidence_binding": {
+    "report.json": "fb837366059889a7ec182cdff418dccf0a118364dd65fdcf1dae054e0fcca77d",
+    "report.html": "c7d5ab095fd652097b53666f7ad00cf7d088900c06bbc6615d396fe943741af2",
+    "report.md": "9e8ceef7082e0c2dc37e6ee6ff0fd55551eeb4e3c224c3ac9fb79586b0a1035c",
+    "calls.json": "27faa0bec35c7b8ab83c1da486a41c4d0e74ce48f5c0a0af8df107d2a3672209",
+    "result.json": "790828735ec33f3b9e71e6d4d8c50ed69787724bf1bff59f927316b6059d24bc",
+    "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+  }
+}

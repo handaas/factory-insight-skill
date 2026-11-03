@@ -1,0 +1,680 @@
+{
+  "run_id": "live-replaced-20261027",
+  "skill": "factory-insight-skill",
+  "counts": {
+    "passed": 4
+  },
+  "scenarios": [
+    {
+      "scenario": {
+        "id": "04-apparel-guangdong",
+        "title": "广东服装工厂寻源",
+        "user_request": "请在广东省检索主营服装的工厂。",
+        "purpose": "服装供应商长名单建立",
+        "args": [
+          "--search",
+          "服装",
+          "--keyword-type",
+          "主营产品",
+          "--address",
+          "广东省",
+          "--page-size",
+          "10"
+        ],
+        "expected_checks": [
+          "检索模式且至少一个地区",
+          "keyword-type 为主营产品",
+          "地址解析为嵌套地区列表",
+          "不把搜索结果当作已审核供应商"
+        ],
+        "limitations": [
+          "搜索只提供候选线索",
+          "主营产品标签和实际当前产能需复核"
+        ]
+      },
+      "result": {
+        "schema_version": 1,
+        "skill": "factory-insight-skill",
+        "case_id": "04-apparel-guangdong",
+        "title": "广东服装工厂寻源",
+        "invocation_id": "1793069082103728000",
+        "provenance": {
+          "integrator_id": "683e574805537ace146cc05e",
+          "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+          "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+          "scenario_sha256": "b5993a59b3eea937c7e59961d6a9473c9cdd607e6d36f08328ea5748d0766e4c",
+          "skill_source_hashes": {
+            "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+            "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+            "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+            "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+            "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+          },
+          "upstream_source_hashes": {
+            "factory-insight-mcp-server": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          },
+          "upstream_dependency_hashes": {
+            "factory-insight-mcp-server/server/mcp_server.py": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          }
+        },
+        "source_changed_during_run": false,
+        "started_at": "2026-10-27T10:44:42+08:00",
+        "elapsed_seconds": 2.684,
+        "returncode": 0,
+        "exception_type": null,
+        "command": "python3 factory-insight-skill/scripts/compose_report.py --search '服装' --keyword-type '主营产品' --address '广东省' --page-size 10 --output factory-insight-skill/output/live-replaced-20261027/04-apparel-guangdong/report.json --report-output factory-insight-skill/output/live-replaced-20261027/04-apparel-guangdong/report.html",
+        "transport": "local MCP servers via loopback streamable-http",
+        "cache_used": false,
+        "call_count": 1,
+        "successful_data_calls": 1,
+        "empty_calls": 0,
+        "failed_calls": 0,
+        "checks": {
+          "issues": [],
+          "warnings": [],
+          "coverage_pct": 100,
+          "subject": {
+            "enterprise": "服装",
+            "matchKeyword": "服装",
+            "keywordType": "主营产品",
+            "match_raw": "服装",
+            "resolved": true,
+            "resolve_reason": "工厂检索模式：按关键词直查",
+            "mode": "search",
+            "address": [
+              [
+                "广东省"
+              ]
+            ]
+          },
+          "title": "服装 工厂检索样本报告",
+          "data_mode": null,
+          "metrics": [
+            {
+              "label": "检索结果",
+              "value": "49967",
+              "hint": "工厂检索命中数"
+            }
+          ],
+          "quality_report": {
+            "total_sections": 1,
+            "populated_sections": 1,
+            "empty_sections": 0,
+            "coverage_pct": 100
+          },
+          "unregistered_tools": [],
+          "checks": {
+            "json_html_markdown": true,
+            "explicit_live": true,
+            "tool_calls_recorded": 1,
+            "offline_scripts": true,
+            "independent_rerender": true,
+            "offline_browser": true
+          }
+        },
+        "status": "passed",
+        "source_hashes": {
+          "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+          "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+          "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+          "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+          "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+        },
+        "technical_status": "passed",
+        "audited_at": "2026-10-27T11:13:00+08:00",
+        "evidence_binding": {
+          "report.json": "a157349530d2d7386d067fc01d48d11755544913ae4ef5b397f4c85c3d33b886",
+          "report.html": "402439bf839d80ab2fa623f9523cb19c69fbb83f8a083035126d92a5c865584a",
+          "report.md": "69abd6a9b7ea04c0975d0939cd5925499a7365e0c9b764c5e10cc3bfa99711ac",
+          "calls.json": "cf7121db46c90768efb34e0ee914269003f52227d139610b14423427bdaa5b02",
+          "result.json": "ec7fc40d85686fcff96eaeea44e5aa731f40c668a498e397bfa1e76586b42fa0",
+          "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+        },
+        "business_review": {
+          "id": "04-apparel-guangdong",
+          "verdict": "acceptable",
+          "summary": "本轮真实产物的全部清单检查均有当前字段证据，且报告保留样本/缺失/关系边界。",
+          "checks": [
+            {
+              "expectation": "检索模式且至少一个地区",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+            },
+            {
+              "expectation": "keyword-type 为主营产品",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+            },
+            {
+              "expectation": "地址解析为嵌套地区列表",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+            },
+            {
+              "expectation": "不把搜索结果当作已审核供应商",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+            }
+          ],
+          "issues": [],
+          "evidence_binding": {
+            "report.json": "a157349530d2d7386d067fc01d48d11755544913ae4ef5b397f4c85c3d33b886",
+            "report.html": "402439bf839d80ab2fa623f9523cb19c69fbb83f8a083035126d92a5c865584a",
+            "report.md": "69abd6a9b7ea04c0975d0939cd5925499a7365e0c9b764c5e10cc3bfa99711ac",
+            "calls.json": "cf7121db46c90768efb34e0ee914269003f52227d139610b14423427bdaa5b02",
+            "result.json": "ec7fc40d85686fcff96eaeea44e5aa731f40c668a498e397bfa1e76586b42fa0",
+            "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+          }
+        }
+      }
+    },
+    {
+      "scenario": {
+        "id": "06-robotics-multiregion",
+        "title": "多地区工业机器人工厂",
+        "user_request": "请同时在广东省和江苏省苏州市查找工业机器人相关工厂。",
+        "purpose": "跨区域制造资源比较",
+        "args": [
+          "--search",
+          "工业机器人",
+          "--keyword-type",
+          "综合搜索",
+          "--address",
+          "广东省",
+          "--address",
+          "江苏省,苏州市",
+          "--page-size",
+          "10"
+        ],
+        "expected_checks": [
+          "两个 --address 都被保留",
+          "地址解析结果为两个独立层级路径",
+          "综合搜索口径明确",
+          "比较只基于返回样本"
+        ],
+        "limitations": [
+          "不同地区命中量受数据覆盖影响",
+          "第一页结果不足以代表完整产业规模"
+        ]
+      },
+      "result": {
+        "schema_version": 1,
+        "skill": "factory-insight-skill",
+        "case_id": "06-robotics-multiregion",
+        "title": "多地区工业机器人工厂",
+        "invocation_id": "1793069084949813000",
+        "provenance": {
+          "integrator_id": "683e574805537ace146cc05e",
+          "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+          "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+          "scenario_sha256": "e7f9e502a6f58121f5a4ce5be9b85b35f33a802b2ac42fe0582d18f2aaf16d7a",
+          "skill_source_hashes": {
+            "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+            "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+            "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+            "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+            "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+          },
+          "upstream_source_hashes": {
+            "factory-insight-mcp-server": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          },
+          "upstream_dependency_hashes": {
+            "factory-insight-mcp-server/server/mcp_server.py": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          }
+        },
+        "source_changed_during_run": false,
+        "started_at": "2026-10-27T10:44:45+08:00",
+        "elapsed_seconds": 4.194,
+        "returncode": 0,
+        "exception_type": null,
+        "command": "python3 factory-insight-skill/scripts/compose_report.py --search '工业机器人' --keyword-type '综合搜索' --address '广东省' --address '江苏省,苏州市' --page-size 10 --output factory-insight-skill/output/live-replaced-20261027/06-robotics-multiregion/report.json --report-output factory-insight-skill/output/live-replaced-20261027/06-robotics-multiregion/report.html",
+        "transport": "local MCP servers via loopback streamable-http",
+        "cache_used": false,
+        "call_count": 1,
+        "successful_data_calls": 1,
+        "empty_calls": 0,
+        "failed_calls": 0,
+        "checks": {
+          "issues": [],
+          "warnings": [],
+          "coverage_pct": 100,
+          "subject": {
+            "enterprise": "工业机器人",
+            "matchKeyword": "工业机器人",
+            "keywordType": "综合搜索",
+            "match_raw": "工业机器人",
+            "resolved": true,
+            "resolve_reason": "工厂检索模式：按关键词直查",
+            "mode": "search",
+            "address": [
+              [
+                "广东省"
+              ],
+              [
+                "江苏省",
+                "苏州市"
+              ]
+            ]
+          },
+          "title": "工业机器人 工厂检索样本报告",
+          "data_mode": null,
+          "metrics": [
+            {
+              "label": "检索结果",
+              "value": "11160",
+              "hint": "工厂检索命中数"
+            }
+          ],
+          "quality_report": {
+            "total_sections": 1,
+            "populated_sections": 1,
+            "empty_sections": 0,
+            "coverage_pct": 100
+          },
+          "unregistered_tools": [],
+          "checks": {
+            "json_html_markdown": true,
+            "explicit_live": true,
+            "tool_calls_recorded": 1,
+            "offline_scripts": true,
+            "independent_rerender": true,
+            "offline_browser": true
+          }
+        },
+        "status": "passed",
+        "source_hashes": {
+          "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+          "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+          "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+          "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+          "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+        },
+        "technical_status": "passed",
+        "audited_at": "2026-10-27T11:13:00+08:00",
+        "evidence_binding": {
+          "report.json": "5b118dd3f4243681d3eb406579da84be28141aafd960cb76b1f494454e54843b",
+          "report.html": "1d61cd688f9586b497381ad590d9ebbc26ac765f722a3bbf7f3ef3970e9590a2",
+          "report.md": "75283315cdfe8ffb0bca183c811379257de2f245522e20af2205434dbfdbd8b8",
+          "calls.json": "46e098a322cfa2949bed24bac1d0e4ae2d05536fc81a921a688701fb635ea5fa",
+          "result.json": "854e69fec759e505e6c7b2b4cb006281e71e9ecc4f861e654bed25936494c80d",
+          "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+        },
+        "business_review": {
+          "id": "06-robotics-multiregion",
+          "verdict": "acceptable",
+          "summary": "本轮真实产物的全部清单检查均有当前字段证据，且报告保留样本/缺失/关系边界。",
+          "checks": [
+            {
+              "expectation": "两个 --address 都被保留",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":11160,\"args\":{\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]}}],\"subject\":{\"enterprise\":\"工业机器人\",\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"match_raw\":\"工业机器人\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"11160\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"广东拓斯达科技股份有限公司\",\"主营产品\":\"粉碎机、CNC上下料机器人、五金模具机械、关节型机器人、冲压机自动化解决方案、机电工程、塑机辅机、咨询、自动化控制系统软、中央供料系统、CNC智能数控装备、混料机、吸料机、冰水机、惠企机械手、粉碎回收等塑胶机械设备、组装自动化解决方案、混合计量、制冷设备、水电器系统、焊接自动化解决方案、医疗产品组装线、无尘室、自动化设备及自动供料、工业机器人、计量机、除湿干燥、模温机、模具监视器、打印设备、除湿干燥机、打印设备耗材等橡胶制品、机械手等智能装备、压铸自动化解决方案、塑料制品、无尘车间、注塑机、机械手、硬件\",\"注册资本\":\"476972412.0 人民币\",\"成立日期\":\"2007-06-01\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广州数控设备有限公司\",\"主营产品\":\"主轴电机、机床数控化改造、金属切削机床、伺服驱动器、全自动注塑机、配电或控制设备零件、图示仪、太阳能源、关节型机器人、工业自动控制系统装置、机械工业、试验台、铣床、组合机床、全电动注塑机、数控车床、视频分配器、车床、机床数控、交流伺服驱动系统、弧焊机、钻铣床、各地名优数控机床、电子、自动化控制、焊接机器人、格栅灯、数控加工中心、中心数控系统、电机、售后服务、机床、GSK系列数控系统、五金、数控磨床、市政和环境卫生机械、电器辅件、设备、机械、主轴伺服电动机、数控系统交流伺服系统、国产数控车床、普通机床数控化改造、交流伺服系统、剥线机、工业机器人、单轴控制器、GSK系列车床、机器人、GSK数控系统、交流伺服系统及电机、全数字式交流伺服驱动装置、GSK系列多轴车铣冲磨加工中心、普通机床、伺服电机驱动器、CT-L数控滑台、数控钻铣床、电脑锣、普通车床、伺服电机、系统、中心、多功能控制器、注塑机、数控系统、教学设备、主轴驱动器、数控注塑机、步进电机驱动器、数控滑台改造、数控铣床、交流、GSK系列数控车床、广数系统、电饭煲、电饭锅、步进驱动器、国内名优数控机床、普通车床数控化改造、电机驱动器、数控机床\",\"注册资本\":\"10000000.0 人民币\",\"成立日期\":\"1991-04-08\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1069617,\"markdown_bytes\":13879}"
+            },
+            {
+              "expectation": "地址解析结果为两个独立层级路径",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":11160,\"args\":{\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]}}],\"subject\":{\"enterprise\":\"工业机器人\",\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"match_raw\":\"工业机器人\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"11160\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"广东拓斯达科技股份有限公司\",\"主营产品\":\"粉碎机、CNC上下料机器人、五金模具机械、关节型机器人、冲压机自动化解决方案、机电工程、塑机辅机、咨询、自动化控制系统软、中央供料系统、CNC智能数控装备、混料机、吸料机、冰水机、惠企机械手、粉碎回收等塑胶机械设备、组装自动化解决方案、混合计量、制冷设备、水电器系统、焊接自动化解决方案、医疗产品组装线、无尘室、自动化设备及自动供料、工业机器人、计量机、除湿干燥、模温机、模具监视器、打印设备、除湿干燥机、打印设备耗材等橡胶制品、机械手等智能装备、压铸自动化解决方案、塑料制品、无尘车间、注塑机、机械手、硬件\",\"注册资本\":\"476972412.0 人民币\",\"成立日期\":\"2007-06-01\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广州数控设备有限公司\",\"主营产品\":\"主轴电机、机床数控化改造、金属切削机床、伺服驱动器、全自动注塑机、配电或控制设备零件、图示仪、太阳能源、关节型机器人、工业自动控制系统装置、机械工业、试验台、铣床、组合机床、全电动注塑机、数控车床、视频分配器、车床、机床数控、交流伺服驱动系统、弧焊机、钻铣床、各地名优数控机床、电子、自动化控制、焊接机器人、格栅灯、数控加工中心、中心数控系统、电机、售后服务、机床、GSK系列数控系统、五金、数控磨床、市政和环境卫生机械、电器辅件、设备、机械、主轴伺服电动机、数控系统交流伺服系统、国产数控车床、普通机床数控化改造、交流伺服系统、剥线机、工业机器人、单轴控制器、GSK系列车床、机器人、GSK数控系统、交流伺服系统及电机、全数字式交流伺服驱动装置、GSK系列多轴车铣冲磨加工中心、普通机床、伺服电机驱动器、CT-L数控滑台、数控钻铣床、电脑锣、普通车床、伺服电机、系统、中心、多功能控制器、注塑机、数控系统、教学设备、主轴驱动器、数控注塑机、步进电机驱动器、数控滑台改造、数控铣床、交流、GSK系列数控车床、广数系统、电饭煲、电饭锅、步进驱动器、国内名优数控机床、普通车床数控化改造、电机驱动器、数控机床\",\"注册资本\":\"10000000.0 人民币\",\"成立日期\":\"1991-04-08\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1069617,\"markdown_bytes\":13879}"
+            },
+            {
+              "expectation": "综合搜索口径明确",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":11160,\"args\":{\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]}}],\"subject\":{\"enterprise\":\"工业机器人\",\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"match_raw\":\"工业机器人\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"11160\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"广东拓斯达科技股份有限公司\",\"主营产品\":\"粉碎机、CNC上下料机器人、五金模具机械、关节型机器人、冲压机自动化解决方案、机电工程、塑机辅机、咨询、自动化控制系统软、中央供料系统、CNC智能数控装备、混料机、吸料机、冰水机、惠企机械手、粉碎回收等塑胶机械设备、组装自动化解决方案、混合计量、制冷设备、水电器系统、焊接自动化解决方案、医疗产品组装线、无尘室、自动化设备及自动供料、工业机器人、计量机、除湿干燥、模温机、模具监视器、打印设备、除湿干燥机、打印设备耗材等橡胶制品、机械手等智能装备、压铸自动化解决方案、塑料制品、无尘车间、注塑机、机械手、硬件\",\"注册资本\":\"476972412.0 人民币\",\"成立日期\":\"2007-06-01\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广州数控设备有限公司\",\"主营产品\":\"主轴电机、机床数控化改造、金属切削机床、伺服驱动器、全自动注塑机、配电或控制设备零件、图示仪、太阳能源、关节型机器人、工业自动控制系统装置、机械工业、试验台、铣床、组合机床、全电动注塑机、数控车床、视频分配器、车床、机床数控、交流伺服驱动系统、弧焊机、钻铣床、各地名优数控机床、电子、自动化控制、焊接机器人、格栅灯、数控加工中心、中心数控系统、电机、售后服务、机床、GSK系列数控系统、五金、数控磨床、市政和环境卫生机械、电器辅件、设备、机械、主轴伺服电动机、数控系统交流伺服系统、国产数控车床、普通机床数控化改造、交流伺服系统、剥线机、工业机器人、单轴控制器、GSK系列车床、机器人、GSK数控系统、交流伺服系统及电机、全数字式交流伺服驱动装置、GSK系列多轴车铣冲磨加工中心、普通机床、伺服电机驱动器、CT-L数控滑台、数控钻铣床、电脑锣、普通车床、伺服电机、系统、中心、多功能控制器、注塑机、数控系统、教学设备、主轴驱动器、数控注塑机、步进电机驱动器、数控滑台改造、数控铣床、交流、GSK系列数控车床、广数系统、电饭煲、电饭锅、步进驱动器、国内名优数控机床、普通车床数控化改造、电机驱动器、数控机床\",\"注册资本\":\"10000000.0 人民币\",\"成立日期\":\"1991-04-08\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1069617,\"markdown_bytes\":13879}"
+            },
+            {
+              "expectation": "比较只基于返回样本",
+              "status": "pass",
+              "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":11160,\"args\":{\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]}}],\"subject\":{\"enterprise\":\"工业机器人\",\"matchKeyword\":\"工业机器人\",\"keywordType\":\"综合搜索\",\"match_raw\":\"工业机器人\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"],[\"江苏省\",\"苏州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"11160\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"广东拓斯达科技股份有限公司\",\"主营产品\":\"粉碎机、CNC上下料机器人、五金模具机械、关节型机器人、冲压机自动化解决方案、机电工程、塑机辅机、咨询、自动化控制系统软、中央供料系统、CNC智能数控装备、混料机、吸料机、冰水机、惠企机械手、粉碎回收等塑胶机械设备、组装自动化解决方案、混合计量、制冷设备、水电器系统、焊接自动化解决方案、医疗产品组装线、无尘室、自动化设备及自动供料、工业机器人、计量机、除湿干燥、模温机、模具监视器、打印设备、除湿干燥机、打印设备耗材等橡胶制品、机械手等智能装备、压铸自动化解决方案、塑料制品、无尘车间、注塑机、机械手、硬件\",\"注册资本\":\"476972412.0 人民币\",\"成立日期\":\"2007-06-01\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广州数控设备有限公司\",\"主营产品\":\"主轴电机、机床数控化改造、金属切削机床、伺服驱动器、全自动注塑机、配电或控制设备零件、图示仪、太阳能源、关节型机器人、工业自动控制系统装置、机械工业、试验台、铣床、组合机床、全电动注塑机、数控车床、视频分配器、车床、机床数控、交流伺服驱动系统、弧焊机、钻铣床、各地名优数控机床、电子、自动化控制、焊接机器人、格栅灯、数控加工中心、中心数控系统、电机、售后服务、机床、GSK系列数控系统、五金、数控磨床、市政和环境卫生机械、电器辅件、设备、机械、主轴伺服电动机、数控系统交流伺服系统、国产数控车床、普通机床数控化改造、交流伺服系统、剥线机、工业机器人、单轴控制器、GSK系列车床、机器人、GSK数控系统、交流伺服系统及电机、全数字式交流伺服驱动装置、GSK系列多轴车铣冲磨加工中心、普通机床、伺服电机驱动器、CT-L数控滑台、数控钻铣床、电脑锣、普通车床、伺服电机、系统、中心、多功能控制器、注塑机、数控系统、教学设备、主轴驱动器、数控注塑机、步进电机驱动器、数控滑台改造、数控铣床、交流、GSK系列数控车床、广数系统、电饭煲、电饭锅、步进驱动器、国内名优数控机床、普通车床数控化改造、电机驱动器、数控机床\",\"注册资本\":\"10000000.0 人民币\",\"成立日期\":\"1991-04-08\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1069617,\"markdown_bytes\":13879}"
+            }
+          ],
+          "issues": [],
+          "evidence_binding": {
+            "report.json": "5b118dd3f4243681d3eb406579da84be28141aafd960cb76b1f494454e54843b",
+            "report.html": "1d61cd688f9586b497381ad590d9ebbc26ac765f722a3bbf7f3ef3970e9590a2",
+            "report.md": "75283315cdfe8ffb0bca183c811379257de2f245522e20af2205434dbfdbd8b8",
+            "calls.json": "46e098a322cfa2949bed24bac1d0e4ae2d05536fc81a921a688701fb635ea5fa",
+            "result.json": "854e69fec759e505e6c7b2b4cb006281e71e9ecc4f861e654bed25936494c80d",
+            "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+          }
+        }
+      }
+    },
+    {
+      "scenario": {
+        "id": "09-chaozhou-ceramic-product-candidates",
+        "title": "潮州陶瓷候选产品核查",
+        "user_request": "请按主营产品检索广东省潮州市的陶瓷工厂候选，列出实际返回的企业名称、主营产品和登记辅助字段；地区只作为查询条件，不声称逐条地址已验证。",
+        "purpose": "建立可按主营产品人工复核的陶瓷候选表。",
+        "args": [
+          "--search",
+          "陶瓷",
+          "--keyword-type",
+          "主营产品",
+          "--address",
+          "广东省,潮州市",
+          "--page-size",
+          "10"
+        ],
+        "expected_checks": [
+          "search_records 至少有两条实际返回记录",
+          "至少两条记录同时具备非空企业名称和主营产品",
+          "每条计入候选的记录还应具备成立日期或注册资本至少一项",
+          "候选相关性必须由主营产品文本支持，不能只用命中总数或 address 参数",
+          "报告明确记录地址缺失时无法逐条验证地区效果"
+        ],
+        "limitations": [
+          "地址过滤效果不能从缺失的记录地址独立复核",
+          "候选不等于已验厂或具备产能"
+        ]
+      },
+      "result": {
+        "schema_version": 1,
+        "skill": "factory-insight-skill",
+        "case_id": "09-chaozhou-ceramic-product-candidates",
+        "title": "潮州陶瓷候选产品核查",
+        "invocation_id": "1793069084986517000",
+        "provenance": {
+          "integrator_id": "683e574805537ace146cc05e",
+          "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+          "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+          "scenario_sha256": "72a6e37dd944b5a8f87310f907f2717eb106bc7d2f0520398e462baa932073ed",
+          "skill_source_hashes": {
+            "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+            "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+            "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+            "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+            "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+          },
+          "upstream_source_hashes": {
+            "factory-insight-mcp-server": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          },
+          "upstream_dependency_hashes": {
+            "factory-insight-mcp-server/server/mcp_server.py": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          }
+        },
+        "source_changed_during_run": false,
+        "started_at": "2026-10-27T10:44:45+08:00",
+        "elapsed_seconds": 3.296,
+        "returncode": 0,
+        "exception_type": null,
+        "command": "python3 factory-insight-skill/scripts/compose_report.py --search '陶瓷' --keyword-type '主营产品' --address '广东省,潮州市' --page-size 10 --output factory-insight-skill/output/live-replaced-20261027/09-chaozhou-ceramic-product-candidates/report.json --report-output factory-insight-skill/output/live-replaced-20261027/09-chaozhou-ceramic-product-candidates/report.html",
+        "transport": "local MCP servers via loopback streamable-http",
+        "cache_used": false,
+        "call_count": 1,
+        "successful_data_calls": 1,
+        "empty_calls": 0,
+        "failed_calls": 0,
+        "checks": {
+          "issues": [],
+          "warnings": [],
+          "coverage_pct": 100,
+          "subject": {
+            "enterprise": "陶瓷",
+            "matchKeyword": "陶瓷",
+            "keywordType": "主营产品",
+            "match_raw": "陶瓷",
+            "resolved": true,
+            "resolve_reason": "工厂检索模式：按关键词直查",
+            "mode": "search",
+            "address": [
+              [
+                "广东省",
+                "潮州市"
+              ]
+            ]
+          },
+          "title": "陶瓷 工厂检索样本报告",
+          "data_mode": null,
+          "metrics": [
+            {
+              "label": "检索结果",
+              "value": "3746",
+              "hint": "工厂检索命中数"
+            }
+          ],
+          "quality_report": {
+            "total_sections": 1,
+            "populated_sections": 1,
+            "empty_sections": 0,
+            "coverage_pct": 100
+          },
+          "unregistered_tools": [],
+          "checks": {
+            "json_html_markdown": true,
+            "explicit_live": true,
+            "tool_calls_recorded": 1,
+            "offline_scripts": true,
+            "independent_rerender": true,
+            "offline_browser": true
+          }
+        },
+        "status": "passed",
+        "source_hashes": {
+          "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+          "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+          "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+          "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+          "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+        },
+        "technical_status": "passed",
+        "audited_at": "2026-10-27T11:13:00+08:00",
+        "evidence_binding": {
+          "report.json": "fb837366059889a7ec182cdff418dccf0a118364dd65fdcf1dae054e0fcca77d",
+          "report.html": "c7d5ab095fd652097b53666f7ad00cf7d088900c06bbc6615d396fe943741af2",
+          "report.md": "9e8ceef7082e0c2dc37e6ee6ff0fd55551eeb4e3c224c3ac9fb79586b0a1035c",
+          "calls.json": "27faa0bec35c7b8ab83c1da486a41c4d0e74ce48f5c0a0af8df107d2a3672209",
+          "result.json": "790828735ec33f3b9e71e6d4d8c50ed69787724bf1bff59f927316b6059d24bc",
+          "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+        },
+        "business_review": {
+          "id": "09-chaozhou-ceramic-product-candidates",
+          "verdict": "acceptable",
+          "summary": "本轮真实产物的全部清单检查均有当前字段证据，且报告保留样本/缺失/关系边界。",
+          "checks": [
+            {
+              "expectation": "search_records 至少有两条实际返回记录",
+              "status": "pass",
+              "evidence": "search_records为10/3746；潮州三环与广东四通均同时有企业名称、含陶瓷的主营产品、成立日期和注册资本。报告逐条地址均标‘上游未返回（不可逐条复核）’，未把address请求回显当地区证据。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":3746,\"args\":{\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\",\"潮州市\"]]}}],\"subject\":{\"enterprise\":\"陶瓷\",\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"match_raw\":\"陶瓷\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\",\"潮州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"3746\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"潮州三环(集团)股份有限公司\",\"主营产品\":\"电子陶瓷元件、电阻器与电位器、固定电阻器、氧化物陶瓷、振荡器、电阻器、氧化铝陶瓷基板、连接器、光通讯\",\"注册资本\":\"1916497371.0 人民币\",\"成立日期\":\"1992-12-10\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广东四通集团股份有限公司\",\"主营产品\":\"建材、陶瓷制品、管件、纸制品 不含印、仿古家具、工艺陶瓷、四通、卫生洁具、家装、日用瓷\",\"注册资本\":\"320016000.0 人民币\",\"成立日期\":\"1997-08-29\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1062808,\"markdown_bytes\":7203}"
+            },
+            {
+              "expectation": "至少两条记录同时具备非空企业名称和主营产品",
+              "status": "pass",
+              "evidence": "search_records为10/3746；潮州三环与广东四通均同时有企业名称、含陶瓷的主营产品、成立日期和注册资本。报告逐条地址均标‘上游未返回（不可逐条复核）’，未把address请求回显当地区证据。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":3746,\"args\":{\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\",\"潮州市\"]]}}],\"subject\":{\"enterprise\":\"陶瓷\",\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"match_raw\":\"陶瓷\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\",\"潮州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"3746\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"潮州三环(集团)股份有限公司\",\"主营产品\":\"电子陶瓷元件、电阻器与电位器、固定电阻器、氧化物陶瓷、振荡器、电阻器、氧化铝陶瓷基板、连接器、光通讯\",\"注册资本\":\"1916497371.0 人民币\",\"成立日期\":\"1992-12-10\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广东四通集团股份有限公司\",\"主营产品\":\"建材、陶瓷制品、管件、纸制品 不含印、仿古家具、工艺陶瓷、四通、卫生洁具、家装、日用瓷\",\"注册资本\":\"320016000.0 人民币\",\"成立日期\":\"1997-08-29\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1062808,\"markdown_bytes\":7203}"
+            },
+            {
+              "expectation": "每条计入候选的记录还应具备成立日期或注册资本至少一项",
+              "status": "pass",
+              "evidence": "search_records为10/3746；潮州三环与广东四通均同时有企业名称、含陶瓷的主营产品、成立日期和注册资本。报告逐条地址均标‘上游未返回（不可逐条复核）’，未把address请求回显当地区证据。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":3746,\"args\":{\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\",\"潮州市\"]]}}],\"subject\":{\"enterprise\":\"陶瓷\",\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"match_raw\":\"陶瓷\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\",\"潮州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"3746\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"潮州三环(集团)股份有限公司\",\"主营产品\":\"电子陶瓷元件、电阻器与电位器、固定电阻器、氧化物陶瓷、振荡器、电阻器、氧化铝陶瓷基板、连接器、光通讯\",\"注册资本\":\"1916497371.0 人民币\",\"成立日期\":\"1992-12-10\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广东四通集团股份有限公司\",\"主营产品\":\"建材、陶瓷制品、管件、纸制品 不含印、仿古家具、工艺陶瓷、四通、卫生洁具、家装、日用瓷\",\"注册资本\":\"320016000.0 人民币\",\"成立日期\":\"1997-08-29\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1062808,\"markdown_bytes\":7203}"
+            },
+            {
+              "expectation": "候选相关性必须由主营产品文本支持，不能只用命中总数或 address 参数",
+              "status": "pass",
+              "evidence": "search_records为10/3746；潮州三环与广东四通均同时有企业名称、含陶瓷的主营产品、成立日期和注册资本。报告逐条地址均标‘上游未返回（不可逐条复核）’，未把address请求回显当地区证据。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":3746,\"args\":{\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\",\"潮州市\"]]}}],\"subject\":{\"enterprise\":\"陶瓷\",\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"match_raw\":\"陶瓷\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\",\"潮州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"3746\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"潮州三环(集团)股份有限公司\",\"主营产品\":\"电子陶瓷元件、电阻器与电位器、固定电阻器、氧化物陶瓷、振荡器、电阻器、氧化铝陶瓷基板、连接器、光通讯\",\"注册资本\":\"1916497371.0 人民币\",\"成立日期\":\"1992-12-10\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广东四通集团股份有限公司\",\"主营产品\":\"建材、陶瓷制品、管件、纸制品 不含印、仿古家具、工艺陶瓷、四通、卫生洁具、家装、日用瓷\",\"注册资本\":\"320016000.0 人民币\",\"成立日期\":\"1997-08-29\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1062808,\"markdown_bytes\":7203}"
+            },
+            {
+              "expectation": "报告明确记录地址缺失时无法逐条验证地区效果",
+              "status": "pass",
+              "evidence": "search_records为10/3746；潮州三环与广东四通均同时有企业名称、含陶瓷的主营产品、成立日期和注册资本。报告逐条地址均标‘上游未返回（不可逐条复核）’，未把address请求回显当地区证据。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":3746,\"args\":{\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\",\"潮州市\"]]}}],\"subject\":{\"enterprise\":\"陶瓷\",\"matchKeyword\":\"陶瓷\",\"keywordType\":\"主营产品\",\"match_raw\":\"陶瓷\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\",\"潮州市\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"3746\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"潮州三环(集团)股份有限公司\",\"主营产品\":\"电子陶瓷元件、电阻器与电位器、固定电阻器、氧化物陶瓷、振荡器、电阻器、氧化铝陶瓷基板、连接器、光通讯\",\"注册资本\":\"1916497371.0 人民币\",\"成立日期\":\"1992-12-10\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"广东四通集团股份有限公司\",\"主营产品\":\"建材、陶瓷制品、管件、纸制品 不含印、仿古家具、工艺陶瓷、四通、卫生洁具、家装、日用瓷\",\"注册资本\":\"320016000.0 人民币\",\"成立日期\":\"1997-08-29\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1062808,\"markdown_bytes\":7203}"
+            }
+          ],
+          "issues": [],
+          "evidence_binding": {
+            "report.json": "fb837366059889a7ec182cdff418dccf0a118364dd65fdcf1dae054e0fcca77d",
+            "report.html": "c7d5ab095fd652097b53666f7ad00cf7d088900c06bbc6615d396fe943741af2",
+            "report.md": "9e8ceef7082e0c2dc37e6ee6ff0fd55551eeb4e3c224c3ac9fb79586b0a1035c",
+            "calls.json": "27faa0bec35c7b8ab83c1da486a41c4d0e74ce48f5c0a0af8df107d2a3672209",
+            "result.json": "790828735ec33f3b9e71e6d4d8c50ed69787724bf1bff59f927316b6059d24bc",
+            "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+          }
+        }
+      }
+    },
+    {
+      "scenario": {
+        "id": "10-jili-name-candidate-disambiguation",
+        "title": "“吉利”名称候选消歧",
+        "user_request": "请按工厂名称检索浙江省含“吉利”的候选，比较实际企业名称和主营产品，识别同名但业务不同的记录；不要归入吉利汽车集团。",
+        "purpose": "支持名称检索后的主体消歧，而不是集团归属判断。",
+        "args": [
+          "--search",
+          "吉利",
+          "--keyword-type",
+          "工厂名称",
+          "--address",
+          "浙江省",
+          "--page-size",
+          "8"
+        ],
+        "expected_checks": [
+          "search_records 至少有两条实际返回记录",
+          "至少两条记录同时具备非空企业名称和主营产品",
+          "至少两条候选的主营产品文本存在可辨别差异",
+          "名称命中必须来自实际企业名称字段，不能只依赖请求关键词",
+          "不得把所有候选归属于同一集团"
+        ],
+        "limitations": [
+          "记录地址缺失时不能验证浙江过滤效果",
+          "名称相似不证明股权或品牌关系"
+        ]
+      },
+      "result": {
+        "schema_version": 1,
+        "skill": "factory-insight-skill",
+        "case_id": "10-jili-name-candidate-disambiguation",
+        "title": "“吉利”名称候选消歧",
+        "invocation_id": "1793069085282722000",
+        "provenance": {
+          "integrator_id": "683e574805537ace146cc05e",
+          "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+          "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+          "scenario_sha256": "21a832d14af9d6138ad94cb1be338677335918b32b6ff44a4ff49ae37ce33391",
+          "skill_source_hashes": {
+            "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+            "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+            "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+            "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+            "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+          },
+          "upstream_source_hashes": {
+            "factory-insight-mcp-server": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          },
+          "upstream_dependency_hashes": {
+            "factory-insight-mcp-server/server/mcp_server.py": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+          }
+        },
+        "source_changed_during_run": false,
+        "started_at": "2026-10-27T10:44:45+08:00",
+        "elapsed_seconds": 3.866,
+        "returncode": 0,
+        "exception_type": null,
+        "command": "python3 factory-insight-skill/scripts/compose_report.py --search '吉利' --keyword-type '工厂名称' --address '浙江省' --page-size 8 --output factory-insight-skill/output/live-replaced-20261027/10-jili-name-candidate-disambiguation/report.json --report-output factory-insight-skill/output/live-replaced-20261027/10-jili-name-candidate-disambiguation/report.html",
+        "transport": "local MCP servers via loopback streamable-http",
+        "cache_used": false,
+        "call_count": 1,
+        "successful_data_calls": 1,
+        "empty_calls": 0,
+        "failed_calls": 0,
+        "checks": {
+          "issues": [],
+          "warnings": [],
+          "coverage_pct": 100,
+          "subject": {
+            "enterprise": "吉利",
+            "matchKeyword": "吉利",
+            "keywordType": "工厂名称",
+            "match_raw": "吉利",
+            "resolved": true,
+            "resolve_reason": "工厂检索模式：按关键词直查",
+            "mode": "search",
+            "address": [
+              [
+                "浙江省"
+              ]
+            ]
+          },
+          "title": "吉利 工厂检索样本报告",
+          "data_mode": null,
+          "metrics": [
+            {
+              "label": "检索结果",
+              "value": "200",
+              "hint": "工厂检索命中数"
+            }
+          ],
+          "quality_report": {
+            "total_sections": 1,
+            "populated_sections": 1,
+            "empty_sections": 0,
+            "coverage_pct": 100
+          },
+          "unregistered_tools": [],
+          "checks": {
+            "json_html_markdown": true,
+            "explicit_live": true,
+            "tool_calls_recorded": 1,
+            "offline_scripts": true,
+            "independent_rerender": true,
+            "offline_browser": true
+          }
+        },
+        "status": "passed",
+        "source_hashes": {
+          "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+          "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+          "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+          "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+          "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+        },
+        "technical_status": "passed",
+        "audited_at": "2026-10-27T11:13:00+08:00",
+        "evidence_binding": {
+          "report.json": "5442dcad44ee3c01c94dc89b2e719ed3de8be5d95025925fc449c9308cda52ff",
+          "report.html": "fe62ae8b108549667c150afff242ce521de3957118062d3be379da64187d189b",
+          "report.md": "1705c20481dc2ff9df43dbbedbaf0f4293a0c14e4f6b2a3e3378d759c7150b9e",
+          "calls.json": "de169001b3d55690a3eb1479fb6a31c6ad6bd3e4c51a82e129df110a68e9141a",
+          "result.json": "9dd9ba1f97dc7f8938cbbd08132b33e41ad399bac85188c51cd3551122597bb1",
+          "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+        },
+        "business_review": {
+          "id": "10-jili-name-candidate-disambiguation",
+          "verdict": "acceptable",
+          "summary": "本轮真实产物的全部清单检查均有当前字段证据，且报告保留样本/缺失/关系边界。",
+          "checks": [
+            {
+              "expectation": "search_records 至少有两条实际返回记录",
+              "status": "pass",
+              "evidence": "search_records有8条名称实际含‘吉利’；宁波市镇海吉利标准件厂主营汽车标准件/紧固件，浙江吉利装璜材料有限公司主营铝塑板/幕墙铝单板，产品文本差异明确，报告仅作候选样本且未归为同一集团。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":8,\"total\":200,\"args\":{\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"pageIndex\":1,\"pageSize\":8,\"address\":[[\"浙江省\"]]}}],\"subject\":{\"enterprise\":\"吉利\",\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"match_raw\":\"吉利\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"浙江省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"200\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":8,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"宁波市镇海吉利标准件厂\",\"主营产品\":\"连接件、汽车配件、模具.材料、螺栓、汽车螺钉、汽车零部件、紧固件、垫圈、五金件.紧固件.焊接铰链、汽车标准件、汽车标准件螺钉、吉利汽配、汽配、螺母、螺钉\",\"注册资本\":\"1680000.0 人民币\",\"成立日期\":\"1999-04-23\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"浙江吉利装璜材料有限公司\",\"主营产品\":\"铝塑板、冲孔铝板、氟碳铝单板、铝板幕墙、雨棚铝板、铝单板、幕墙铝单板、蜂窝铝单板、石纹铝板、加强筋、冲孔铝单板\",\"注册资本\":\"75000000.0 人民币\",\"成立日期\":\"1997-08-12\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1061362,\"markdown_bytes\":6009}"
+            },
+            {
+              "expectation": "至少两条记录同时具备非空企业名称和主营产品",
+              "status": "pass",
+              "evidence": "search_records有8条名称实际含‘吉利’；宁波市镇海吉利标准件厂主营汽车标准件/紧固件，浙江吉利装璜材料有限公司主营铝塑板/幕墙铝单板，产品文本差异明确，报告仅作候选样本且未归为同一集团。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":8,\"total\":200,\"args\":{\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"pageIndex\":1,\"pageSize\":8,\"address\":[[\"浙江省\"]]}}],\"subject\":{\"enterprise\":\"吉利\",\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"match_raw\":\"吉利\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"浙江省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"200\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":8,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"宁波市镇海吉利标准件厂\",\"主营产品\":\"连接件、汽车配件、模具.材料、螺栓、汽车螺钉、汽车零部件、紧固件、垫圈、五金件.紧固件.焊接铰链、汽车标准件、汽车标准件螺钉、吉利汽配、汽配、螺母、螺钉\",\"注册资本\":\"1680000.0 人民币\",\"成立日期\":\"1999-04-23\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"浙江吉利装璜材料有限公司\",\"主营产品\":\"铝塑板、冲孔铝板、氟碳铝单板、铝板幕墙、雨棚铝板、铝单板、幕墙铝单板、蜂窝铝单板、石纹铝板、加强筋、冲孔铝单板\",\"注册资本\":\"75000000.0 人民币\",\"成立日期\":\"1997-08-12\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1061362,\"markdown_bytes\":6009}"
+            },
+            {
+              "expectation": "至少两条候选的主营产品文本存在可辨别差异",
+              "status": "pass",
+              "evidence": "search_records有8条名称实际含‘吉利’；宁波市镇海吉利标准件厂主营汽车标准件/紧固件，浙江吉利装璜材料有限公司主营铝塑板/幕墙铝单板，产品文本差异明确，报告仅作候选样本且未归为同一集团。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":8,\"total\":200,\"args\":{\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"pageIndex\":1,\"pageSize\":8,\"address\":[[\"浙江省\"]]}}],\"subject\":{\"enterprise\":\"吉利\",\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"match_raw\":\"吉利\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"浙江省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"200\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":8,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"宁波市镇海吉利标准件厂\",\"主营产品\":\"连接件、汽车配件、模具.材料、螺栓、汽车螺钉、汽车零部件、紧固件、垫圈、五金件.紧固件.焊接铰链、汽车标准件、汽车标准件螺钉、吉利汽配、汽配、螺母、螺钉\",\"注册资本\":\"1680000.0 人民币\",\"成立日期\":\"1999-04-23\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"浙江吉利装璜材料有限公司\",\"主营产品\":\"铝塑板、冲孔铝板、氟碳铝单板、铝板幕墙、雨棚铝板、铝单板、幕墙铝单板、蜂窝铝单板、石纹铝板、加强筋、冲孔铝单板\",\"注册资本\":\"75000000.0 人民币\",\"成立日期\":\"1997-08-12\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1061362,\"markdown_bytes\":6009}"
+            },
+            {
+              "expectation": "名称命中必须来自实际企业名称字段，不能只依赖请求关键词",
+              "status": "pass",
+              "evidence": "search_records有8条名称实际含‘吉利’；宁波市镇海吉利标准件厂主营汽车标准件/紧固件，浙江吉利装璜材料有限公司主营铝塑板/幕墙铝单板，产品文本差异明确，报告仅作候选样本且未归为同一集团。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":8,\"total\":200,\"args\":{\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"pageIndex\":1,\"pageSize\":8,\"address\":[[\"浙江省\"]]}}],\"subject\":{\"enterprise\":\"吉利\",\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"match_raw\":\"吉利\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"浙江省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"200\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":8,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"宁波市镇海吉利标准件厂\",\"主营产品\":\"连接件、汽车配件、模具.材料、螺栓、汽车螺钉、汽车零部件、紧固件、垫圈、五金件.紧固件.焊接铰链、汽车标准件、汽车标准件螺钉、吉利汽配、汽配、螺母、螺钉\",\"注册资本\":\"1680000.0 人民币\",\"成立日期\":\"1999-04-23\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"浙江吉利装璜材料有限公司\",\"主营产品\":\"铝塑板、冲孔铝板、氟碳铝单板、铝板幕墙、雨棚铝板、铝单板、幕墙铝单板、蜂窝铝单板、石纹铝板、加强筋、冲孔铝单板\",\"注册资本\":\"75000000.0 人民币\",\"成立日期\":\"1997-08-12\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1061362,\"markdown_bytes\":6009}"
+            },
+            {
+              "expectation": "不得把所有候选归属于同一集团",
+              "status": "pass",
+              "evidence": "search_records有8条名称实际含‘吉利’；宁波市镇海吉利标准件厂主营汽车标准件/紧固件，浙江吉利装璜材料有限公司主营铝塑板/幕墙铝单板，产品文本差异明确，报告仅作候选样本且未归为同一集团。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":8,\"total\":200,\"args\":{\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"pageIndex\":1,\"pageSize\":8,\"address\":[[\"浙江省\"]]}}],\"subject\":{\"enterprise\":\"吉利\",\"matchKeyword\":\"吉利\",\"keywordType\":\"工厂名称\",\"match_raw\":\"吉利\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"浙江省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"200\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":8,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"宁波市镇海吉利标准件厂\",\"主营产品\":\"连接件、汽车配件、模具.材料、螺栓、汽车螺钉、汽车零部件、紧固件、垫圈、五金件.紧固件.焊接铰链、汽车标准件、汽车标准件螺钉、吉利汽配、汽配、螺母、螺钉\",\"注册资本\":\"1680000.0 人民币\",\"成立日期\":\"1999-04-23\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"浙江吉利装璜材料有限公司\",\"主营产品\":\"铝塑板、冲孔铝板、氟碳铝单板、铝板幕墙、雨棚铝板、铝单板、幕墙铝单板、蜂窝铝单板、石纹铝板、加强筋、冲孔铝单板\",\"注册资本\":\"75000000.0 人民币\",\"成立日期\":\"1997-08-12\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1061362,\"markdown_bytes\":6009}"
+            }
+          ],
+          "issues": [],
+          "evidence_binding": {
+            "report.json": "5442dcad44ee3c01c94dc89b2e719ed3de8be5d95025925fc449c9308cda52ff",
+            "report.html": "fe62ae8b108549667c150afff242ce521de3957118062d3be379da64187d189b",
+            "report.md": "1705c20481dc2ff9df43dbbedbaf0f4293a0c14e4f6b2a3e3378d759c7150b9e",
+            "calls.json": "de169001b3d55690a3eb1479fb6a31c6ad6bd3e4c51a82e129df110a68e9141a",
+            "result.json": "9dd9ba1f97dc7f8938cbbd08132b33e41ad399bac85188c51cd3551122597bb1",
+            "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+          }
+        }
+      }
+    }
+  ]
+}

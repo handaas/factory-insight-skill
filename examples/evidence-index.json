@@ -1,0 +1,77 @@
+{
+  "run_id": "live-replaced-20261027",
+  "cases": [
+    {
+      "skill": "factory-insight-skill",
+      "id": "04-apparel-guangdong",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "a157349530d2d7386d067fc01d48d11755544913ae4ef5b397f4c85c3d33b886",
+        "report.html": "402439bf839d80ab2fa623f9523cb19c69fbb83f8a083035126d92a5c865584a",
+        "report.md": "69abd6a9b7ea04c0975d0939cd5925499a7365e0c9b764c5e10cc3bfa99711ac",
+        "calls.json": "cf7121db46c90768efb34e0ee914269003f52227d139610b14423427bdaa5b02",
+        "result.json": "ec7fc40d85686fcff96eaeea44e5aa731f40c668a498e397bfa1e76586b42fa0",
+        "audit.json": "971182bcea51954967950edae0033b4336b21f07e4d2fba5a3fa8a2453e31c94",
+        "acceptance.json": "f33b6765a74be716fd434122f655ca96aaed2b8fb34bea9d5fad9340d5d5da07",
+        "business-review.json": "e4cc7549f12689d4980c577887c3f409c73e72cc3cc9f0f4d817793395f323c6",
+        "browser-check.json": "bf8a4b7cf313041b3a008a4cf461d749d985b71cb497223e4e30135948587416"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/04-apparel-guangdong.md"
+    },
+    {
+      "skill": "factory-insight-skill",
+      "id": "06-robotics-multiregion",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "5b118dd3f4243681d3eb406579da84be28141aafd960cb76b1f494454e54843b",
+        "report.html": "1d61cd688f9586b497381ad590d9ebbc26ac765f722a3bbf7f3ef3970e9590a2",
+        "report.md": "75283315cdfe8ffb0bca183c811379257de2f245522e20af2205434dbfdbd8b8",
+        "calls.json": "46e098a322cfa2949bed24bac1d0e4ae2d05536fc81a921a688701fb635ea5fa",
+        "result.json": "854e69fec759e505e6c7b2b4cb006281e71e9ecc4f861e654bed25936494c80d",
+        "audit.json": "a056c595004e0a024d62fbf245b3f8db4cc2bb6a0950d0ee2a5675ce29616478",
+        "acceptance.json": "5fa2720dd07d21498668e0dfa280eebc108cc4a142b4d19e5082b4e71ffec3d6",
+        "business-review.json": "75215ad6531118313f180bd116a1b6135be3f5d65ebf0cacc32429a560b8d386",
+        "browser-check.json": "cc1639a1b5ce428b3e9add77c49f2b58b2c9d37a3bafae0bc670bb3ffeaf460d"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/06-robotics-multiregion.md"
+    },
+    {
+      "skill": "factory-insight-skill",
+      "id": "09-chaozhou-ceramic-product-candidates",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "fb837366059889a7ec182cdff418dccf0a118364dd65fdcf1dae054e0fcca77d",
+        "report.html": "c7d5ab095fd652097b53666f7ad00cf7d088900c06bbc6615d396fe943741af2",
+        "report.md": "9e8ceef7082e0c2dc37e6ee6ff0fd55551eeb4e3c224c3ac9fb79586b0a1035c",
+        "calls.json": "27faa0bec35c7b8ab83c1da486a41c4d0e74ce48f5c0a0af8df107d2a3672209",
+        "result.json": "790828735ec33f3b9e71e6d4d8c50ed69787724bf1bff59f927316b6059d24bc",
+        "audit.json": "03f084265401f2f8c6f50bdad80075b7a8e0402e338147f4ebefc101a3a15bd3",
+        "acceptance.json": "a9ba53b83d810ef3cf22350a327dd69e6b51c2fed53dbf5221dc86f06678f94f",
+        "business-review.json": "f42d9ef6c6f31592a433bfd20d9157bc99ae7f453202f3343a324a603e52a53e",
+        "browser-check.json": "8291baa7a482d9bbf17a6fd164556cba85b16acc310d3b2c08349cda872f4d07"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/09-chaozhou-ceramic-product-candidates.md"
+    },
+    {
+      "skill": "factory-insight-skill",
+      "id": "10-jili-name-candidate-disambiguation",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "5442dcad44ee3c01c94dc89b2e719ed3de8be5d95025925fc449c9308cda52ff",
+        "report.html": "fe62ae8b108549667c150afff242ce521de3957118062d3be379da64187d189b",
+        "report.md": "1705c20481dc2ff9df43dbbedbaf0f4293a0c14e4f6b2a3e3378d759c7150b9e",
+        "calls.json": "de169001b3d55690a3eb1479fb6a31c6ad6bd3e4c51a82e129df110a68e9141a",
+        "result.json": "9dd9ba1f97dc7f8938cbbd08132b33e41ad399bac85188c51cd3551122597bb1",
+        "audit.json": "4aa04a2ece13a21eb8e9390a4a219e55cb6a04f801e8de26720d8023f1dacbb3",
+        "acceptance.json": "31ce816862302b66609196d10cf78c31c30339f0e5185a941014966f3c6aae54",
+        "business-review.json": "e9a9d5f56e74f25cdcf66220c7f3424855d410b88d756ef9ac9f25dbc7cc9630",
+        "browser-check.json": "e1420d78bd42d4dce83cbe80276f06dd691059752201d6de8b5eaa93d74590c5"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/10-jili-name-candidate-disambiguation.md"
+    }
+  ]
+}

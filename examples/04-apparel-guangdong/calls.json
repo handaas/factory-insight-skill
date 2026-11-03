@@ -1,0 +1,55 @@
+[
+  {
+    "tool": "factory_insight_factory_search",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "服装",
+      "keywordType": "主营产品",
+      "pageIndex": 1,
+      "pageSize": 10,
+      "address": [
+        [
+          "广东省"
+        ]
+      ]
+    },
+    "invocation_id": "1793069082103728000",
+    "elapsed_seconds": 2.592,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "resultList",
+      "total"
+    ],
+    "row_count": 10,
+    "reported_total": 49967,
+    "numeric_evidence": [
+      {
+        "path": "resultList[0].regCapital.value",
+        "value": 570707084.0
+      },
+      {
+        "path": "resultList[1].regCapital.value",
+        "value": 3051878231.0
+      },
+      {
+        "path": "resultList[2].regCapital.value",
+        "value": 51000000.0
+      },
+      {
+        "path": "resultList[3].regCapital.value",
+        "value": 60000000.0
+      },
+      {
+        "path": "resultList[4].regCapital.value",
+        "value": 8000000.0
+      },
+      {
+        "path": "total",
+        "value": 49967
+      }
+    ],
+    "response_sha256": "0824356ad77111474552483546eaf45fe1b30a686d8573101d3db9d966b8099f"
+  }
+]

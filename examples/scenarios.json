@@ -1,0 +1,116 @@
+{
+  "skill": "factory-insight-skill",
+  "kind": "verified_positive_examples",
+  "run_id": "live-replaced-20261027",
+  "source_manifest": "../test-records/scenarios-20261027.json",
+  "scenarios": [
+    {
+      "id": "04-apparel-guangdong",
+      "title": "广东服装工厂寻源",
+      "user_request": "请在广东省检索主营服装的工厂。",
+      "purpose": "服装供应商长名单建立",
+      "args": [
+        "--search",
+        "服装",
+        "--keyword-type",
+        "主营产品",
+        "--address",
+        "广东省",
+        "--page-size",
+        "10"
+      ],
+      "expected_checks": [
+        "检索模式且至少一个地区",
+        "keyword-type 为主营产品",
+        "地址解析为嵌套地区列表",
+        "不把搜索结果当作已审核供应商"
+      ],
+      "limitations": [
+        "搜索只提供候选线索",
+        "主营产品标签和实际当前产能需复核"
+      ]
+    },
+    {
+      "id": "06-robotics-multiregion",
+      "title": "多地区工业机器人工厂",
+      "user_request": "请同时在广东省和江苏省苏州市查找工业机器人相关工厂。",
+      "purpose": "跨区域制造资源比较",
+      "args": [
+        "--search",
+        "工业机器人",
+        "--keyword-type",
+        "综合搜索",
+        "--address",
+        "广东省",
+        "--address",
+        "江苏省,苏州市",
+        "--page-size",
+        "10"
+      ],
+      "expected_checks": [
+        "两个 --address 都被保留",
+        "地址解析结果为两个独立层级路径",
+        "综合搜索口径明确",
+        "比较只基于返回样本"
+      ],
+      "limitations": [
+        "不同地区命中量受数据覆盖影响",
+        "第一页结果不足以代表完整产业规模"
+      ]
+    },
+    {
+      "id": "09-chaozhou-ceramic-product-candidates",
+      "title": "潮州陶瓷候选产品核查",
+      "user_request": "请按主营产品检索广东省潮州市的陶瓷工厂候选，列出实际返回的企业名称、主营产品和登记辅助字段；地区只作为查询条件，不声称逐条地址已验证。",
+      "purpose": "建立可按主营产品人工复核的陶瓷候选表。",
+      "args": [
+        "--search",
+        "陶瓷",
+        "--keyword-type",
+        "主营产品",
+        "--address",
+        "广东省,潮州市",
+        "--page-size",
+        "10"
+      ],
+      "expected_checks": [
+        "search_records 至少有两条实际返回记录",
+        "至少两条记录同时具备非空企业名称和主营产品",
+        "每条计入候选的记录还应具备成立日期或注册资本至少一项",
+        "候选相关性必须由主营产品文本支持，不能只用命中总数或 address 参数",
+        "报告明确记录地址缺失时无法逐条验证地区效果"
+      ],
+      "limitations": [
+        "地址过滤效果不能从缺失的记录地址独立复核",
+        "候选不等于已验厂或具备产能"
+      ]
+    },
+    {
+      "id": "10-jili-name-candidate-disambiguation",
+      "title": "“吉利”名称候选消歧",
+      "user_request": "请按工厂名称检索浙江省含“吉利”的候选，比较实际企业名称和主营产品，识别同名但业务不同的记录；不要归入吉利汽车集团。",
+      "purpose": "支持名称检索后的主体消歧，而不是集团归属判断。",
+      "args": [
+        "--search",
+        "吉利",
+        "--keyword-type",
+        "工厂名称",
+        "--address",
+        "浙江省",
+        "--page-size",
+        "8"
+      ],
+      "expected_checks": [
+        "search_records 至少有两条实际返回记录",
+        "至少两条记录同时具备非空企业名称和主营产品",
+        "至少两条候选的主营产品文本存在可辨别差异",
+        "名称命中必须来自实际企业名称字段，不能只依赖请求关键词",
+        "不得把所有候选归属于同一集团"
+      ],
+      "limitations": [
+        "记录地址缺失时不能验证浙江过滤效果",
+        "名称相似不证明股权或品牌关系"
+      ]
+    }
+  ]
+}

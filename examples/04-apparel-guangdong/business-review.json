@@ -1,0 +1,36 @@
+{
+  "id": "04-apparel-guangdong",
+  "verdict": "acceptable",
+  "summary": "本轮真实产物的全部清单检查均有当前字段证据，且报告保留样本/缺失/关系边界。",
+  "checks": [
+    {
+      "expectation": "检索模式且至少一个地区",
+      "status": "pass",
+      "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+    },
+    {
+      "expectation": "keyword-type 为主营产品",
+      "status": "pass",
+      "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+    },
+    {
+      "expectation": "地址解析为嵌套地区列表",
+      "status": "pass",
+      "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+    },
+    {
+      "expectation": "不把搜索结果当作已审核供应商",
+      "status": "pass",
+      "evidence": "该项由当前调用参数、报告同名字段、样本与局限说明共同核对。 当前冻结快照：{\"technical_status\":\"passed\",\"successful_data_calls\":1,\"calls\":[{\"tool\":\"factory_insight_factory_search\",\"status\":\"data\",\"rows\":10,\"total\":49967,\"args\":{\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"pageIndex\":1,\"pageSize\":10,\"address\":[[\"广东省\"]]}}],\"subject\":{\"enterprise\":\"服装\",\"matchKeyword\":\"服装\",\"keywordType\":\"主营产品\",\"match_raw\":\"服装\",\"resolved\":true,\"resolve_reason\":\"工厂检索模式：按关键词直查\",\"mode\":\"search\",\"address\":[[\"广东省\"]]},\"metrics\":[{\"label\":\"检索结果\",\"value\":\"49967\",\"hint\":\"工厂检索命中数\"}],\"core_counts\":{\"sections\":4,\"product_stats\":0,\"search_records\":10,\"management_certs\":0},\"core_samples\":{\"search_records\":[{\"企业名称\":\"比音勒芬服饰股份有限公司\",\"主营产品\":\"家装、包(袋、建材、饰品、体育用、皮革日用品、皮革、纺织、手套、皮革及皮革制品、服饰配件、塑料、木制、服装辅料、日用器皿及日用杂货、金属日用杂品、服装、皮箱、日用杂品综合\",\"注册资本\":\"570707084.0 人民币\",\"成立日期\":\"2003-01-02\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}},{\"企业名称\":\"搜于特集团股份有限公司\",\"主营产品\":\"时尚商务男装、时尚夹克、时尚淑女装、时尚风衣、时尚休闲装、时尚牛仔裤、蕾丝边外套、单件短外套、服装、浪漫校园装、时尚羽绒服\",\"注册资本\":\"3051878231.0 人民币\",\"成立日期\":\"2005-12-05\",\"地区/地址\":\"上游未返回（不可逐条复核）\",\"地址来源字段\":{}}]},\"quality\":{\"total_sections\":1,\"populated_sections\":1,\"empty_sections\":0,\"coverage_pct\":100},\"limit\":\"地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。\",\"html_bytes\":1070901,\"markdown_bytes\":15394}"
+    }
+  ],
+  "issues": [],
+  "evidence_binding": {
+    "report.json": "a157349530d2d7386d067fc01d48d11755544913ae4ef5b397f4c85c3d33b886",
+    "report.html": "402439bf839d80ab2fa623f9523cb19c69fbb83f8a083035126d92a5c865584a",
+    "report.md": "69abd6a9b7ea04c0975d0939cd5925499a7365e0c9b764c5e10cc3bfa99711ac",
+    "calls.json": "cf7121db46c90768efb34e0ee914269003f52227d139610b14423427bdaa5b02",
+    "result.json": "ec7fc40d85686fcff96eaeea44e5aa731f40c668a498e397bfa1e76586b42fa0",
+    "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+  }
+}

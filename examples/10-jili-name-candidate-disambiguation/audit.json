@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "skill": "factory-insight-skill",
+  "case_id": "10-jili-name-candidate-disambiguation",
+  "title": "“吉利”名称候选消歧",
+  "invocation_id": "1793069085282722000",
+  "provenance": {
+    "integrator_id": "683e574805537ace146cc05e",
+    "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+    "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+    "scenario_sha256": "21a832d14af9d6138ad94cb1be338677335918b32b6ff44a4ff49ae37ce33391",
+    "skill_source_hashes": {
+      "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+      "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+      "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+      "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+      "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+    },
+    "upstream_source_hashes": {
+      "factory-insight-mcp-server": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+    },
+    "upstream_dependency_hashes": {
+      "factory-insight-mcp-server/server/mcp_server.py": "f6544c7f4f36b58023cd94a1f6b415772dc361a6202d670f3f88e4816542547d"
+    }
+  },
+  "source_changed_during_run": false,
+  "started_at": "2026-10-27T10:44:45+08:00",
+  "elapsed_seconds": 3.866,
+  "returncode": 0,
+  "exception_type": null,
+  "command": "python3 factory-insight-skill/scripts/compose_report.py --search '吉利' --keyword-type '工厂名称' --address '浙江省' --page-size 8 --output factory-insight-skill/output/live-replaced-20261027/10-jili-name-candidate-disambiguation/report.json --report-output factory-insight-skill/output/live-replaced-20261027/10-jili-name-candidate-disambiguation/report.html",
+  "transport": "local MCP servers via loopback streamable-http",
+  "cache_used": false,
+  "call_count": 1,
+  "successful_data_calls": 1,
+  "empty_calls": 0,
+  "failed_calls": 0,
+  "checks": {
+    "issues": [],
+    "warnings": [],
+    "coverage_pct": 100,
+    "subject": {
+      "enterprise": "吉利",
+      "matchKeyword": "吉利",
+      "keywordType": "工厂名称",
+      "match_raw": "吉利",
+      "resolved": true,
+      "resolve_reason": "工厂检索模式：按关键词直查",
+      "mode": "search",
+      "address": [
+        [
+          "浙江省"
+        ]
+      ]
+    },
+    "title": "吉利 工厂检索样本报告",
+    "data_mode": null,
+    "metrics": [
+      {
+        "label": "检索结果",
+        "value": "200",
+        "hint": "工厂检索命中数"
+      }
+    ],
+    "quality_report": {
+      "total_sections": 1,
+      "populated_sections": 1,
+      "empty_sections": 0,
+      "coverage_pct": 100
+    },
+    "unregistered_tools": [],
+    "checks": {
+      "json_html_markdown": true,
+      "explicit_live": true,
+      "tool_calls_recorded": 1,
+      "offline_scripts": true,
+      "independent_rerender": true,
+      "offline_browser": true
+    }
+  },
+  "status": "passed",
+  "source_hashes": {
+    "scripts/common.py": "fa78e7cb2f09cdb74bc0ed326306c433e71886fd0cf842cbd5f77f2459df3d2f",
+    "scripts/compose_report.py": "972feb5ac847434e15b6977d57fb35591cfd97d3a73f00c83caa05fd11726a4e",
+    "scripts/mcp_client.py": "e2661d707a9510d692bd6125badf50fe9877084cac2b1dd39cdc65446c2c1ea8",
+    "scripts/render_report.py": "fa0a9d51a3a9e0d61c903394ea3f92bb92cab3c800567a3834ed2cc3b5071bf5",
+    "scripts/validate_config.py": "1e0928efc5cf0a41a7f4c46ed99b1a5946de2042470db5ad4af38bd62933cee7"
+  },
+  "technical_status": "passed",
+  "audited_at": "2026-10-27T11:13:00+08:00",
+  "evidence_binding": {
+    "report.json": "5442dcad44ee3c01c94dc89b2e719ed3de8be5d95025925fc449c9308cda52ff",
+    "report.html": "fe62ae8b108549667c150afff242ce521de3957118062d3be379da64187d189b",
+    "report.md": "1705c20481dc2ff9df43dbbedbaf0f4293a0c14e4f6b2a3e3378d759c7150b9e",
+    "calls.json": "de169001b3d55690a3eb1479fb6a31c6ad6bd3e4c51a82e129df110a68e9141a",
+    "result.json": "9dd9ba1f97dc7f8938cbbd08132b33e41ad399bac85188c51cd3551122597bb1",
+    "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+  }
+}
