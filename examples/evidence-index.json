@@ -17,7 +17,7 @@
         "business-review.json": "e4cc7549f12689d4980c577887c3f409c73e72cc3cc9f0f4d817793395f323c6",
         "browser-check.json": "bf8a4b7cf313041b3a008a4cf461d749d985b71cb497223e4e30135948587416"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/04-apparel-guangdong.md"
+      "audit_record": "../test-records/live-replaced-20261027/04-apparel-guangdong.md"
     },
     {
       "skill": "factory-insight-skill",
@@ -35,7 +35,7 @@
         "business-review.json": "75215ad6531118313f180bd116a1b6135be3f5d65ebf0cacc32429a560b8d386",
         "browser-check.json": "cc1639a1b5ce428b3e9add77c49f2b58b2c9d37a3bafae0bc670bb3ffeaf460d"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/06-robotics-multiregion.md"
+      "audit_record": "../test-records/live-replaced-20261027/06-robotics-multiregion.md"
     },
     {
       "skill": "factory-insight-skill",
@@ -53,7 +53,7 @@
         "business-review.json": "f42d9ef6c6f31592a433bfd20d9157bc99ae7f453202f3343a324a603e52a53e",
         "browser-check.json": "8291baa7a482d9bbf17a6fd164556cba85b16acc310d3b2c08349cda872f4d07"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/09-chaozhou-ceramic-product-candidates.md"
+      "audit_record": "../test-records/live-replaced-20261027/09-chaozhou-ceramic-product-candidates.md"
     },
     {
       "skill": "factory-insight-skill",
@@ -71,7 +71,7 @@
         "business-review.json": "e9a9d5f56e74f25cdcf66220c7f3424855d410b88d756ef9ac9f25dbc7cc9630",
         "browser-check.json": "e1420d78bd42d4dce83cbe80276f06dd691059752201d6de8b5eaa93d74590c5"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/10-jili-name-candidate-disambiguation.md"
+      "audit_record": "../test-records/live-replaced-20261027/10-jili-name-candidate-disambiguation.md"
     }
   ]
 }
