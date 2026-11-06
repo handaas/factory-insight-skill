@@ -78,6 +78,33 @@ description: "Use for generating a professional factory-insight big-data report 
 5. **渲染三件套**：`compose_report.py --enterprise ... --output ... --report-output ...` 直接产出 JSON + HTML + Markdown；或 `render_report.py --input ... --output ...` 重渲染。
 6. **返回路径**：返回 JSON、HTML、Markdown 文件路径，以及企业全称映射与数据口径。
 
+## 内容整理与交付审校
+
+1. **主营产品是标签集合**：`mainProducts` 是上游为检索命中的标签，不是已核实的产品目录，常混入跨行业词（童装企业带“闸阀/OLED驱动器”、服装企业带“建材/家装”）。报告保留标签总数、含关键词项与其他标签示例，完整原文留在 `主营产品原文`；不得把整串标签当主营产品清单。
+2. **名称命中不等于主体**：工厂名称含关键词只说明字符包含，可能是跨词组合（如“安吉”+“利奥”命中“吉利”）。报告标“名称含关键词=是/否”，并提示核对注册地、股权与工厂证据，不推断同一集团。
+3. **注册资本规范化**：`570707084.0 人民币` 展示为 `5.71 亿 人民币`，`1000.000000万人民币` 展示为 `1,000 万 人民币`；原文保留在 `注册资本原文`，不四舍五入成整数亿。
+4. **地区不可复核就明说**：单条未返回地区/地址字段时保留“上游未返回（不可逐条复核）”，不能用请求地区反填每条记录，也不生成地域分布。
+5. **检索命中数不是工厂数**：total 是上游关键词/地区筛选结果，含同名不同主体与标签误命中；样本条数、可复核地区条数分别披露。
+6. **产品类目覆盖缺口**：`mainProductCount` 与已分类类目总量差距大时提示覆盖不足，不用类目图表推断完整产品结构或产能。
+7. **内容整理（正常生成 + 离线修订）**：正常 `build_payload_enterprise` / `build_payload_search` 与 `--dry-run` 样例生成在写 JSON/HTML/MD 前自动调用 `apply_content_review(report)`；同一函数也可基于已有 JSON 摘要标签、规范资本展示、标注名称/标签命中，不调用 MCP、不改企业名称与原始标签。离线修订件写 `output/content-quality-review/<case>/`。
+
+```bash
+python - <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+sys.path.insert(0, "scripts")
+import compose_report as cr
+src = Path("examples/10-jili-name-candidate-disambiguation/report.json")
+raw = src.read_bytes()
+report = cr.apply_content_review(json.loads(raw), source_sha256=hashlib.sha256(raw).hexdigest())
+out = Path("output/content-quality-review/10-jili-name-candidate-disambiguation")
+out.mkdir(parents=True, exist_ok=True)
+(out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+PY
+```
+
+- **渲染前置检查**：执行会产出含图表 HTML / PDF 的报告命令前，先验证 `node --version` 与本 skill 自带 `assets/vendor/echarts.min.js` 存在；内嵌静态 SVG 的生成需要 Node.js（推荐当前 LTS，无需 npm 包），缺失时报告生成明确报错。查看已生成的 HTML 与 Markdown 输出不需要 Node。
+
 ## 脚本速查
 
 ```bash
@@ -129,7 +156,7 @@ python scripts/render_report.py --input output/factory.json --output output/fact
 
 - `subject`：企业全称、匹配关键词、主体类型、是否自动补全（检索模式额外含 mode/address）。
 - `abstract` / `summary`：封面摘要与详细摘要。
-- `metrics`：工厂规模、生产线数、月产值、服务品牌数、主营产品数、检索结果数等指标卡。
+- `metrics`：工厂规模、生产线数、月产值、服务品牌数、主营产品数、检索结果数等指标卡；检索样本的注册资本展示已规范化，原文见记录字段。
 - `caliber`：匹配对象、匹配方式、数据范围、产品、局限。
 - `core_analysis`：工厂概况（KV）、工厂产能（KV）、工厂产品统计（表）、工厂检索明细（表）。
 - `representative_records`：代表性工厂记录（企业名称 / 主营产品 / 注册资本 / 成立日期）。

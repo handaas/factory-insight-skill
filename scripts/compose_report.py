@@ -18,6 +18,7 @@ This file never prints secrets; MCP credentials live in the server's own .env.
 from __future__ import annotations
 
 import argparse
+import copy
 import datetime as dt
 import json
 import pathlib
@@ -241,13 +242,67 @@ def _profile_address(value: Any) -> tuple[str, str, str]:
     return raw_text, raw_text, "上游仅返回单一地址原文；报告不清洗其中潜在重复，未做地理校验。"
 
 
+def _trim_number(value: float) -> str:
+    text = f"{value:,.2f}"
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
 def _reg_capital_text(value: Any) -> str:
+    """Readable capital from either a dict or a raw numeric string; keep coin."""
     if isinstance(value, dict):
-        amt = value.get("value")
-        coin = value.get("coinType") or ""
-        if amt is not None:
-            return f"{_text(amt)} {coin}".strip()
-    return _text(value)
+        amount = value.get("value")
+        coin = _text(value.get("coinType"))
+    else:
+        amount = value
+        coin = ""
+    if amount in (None, ""):
+        return _text(amount)
+    raw = _text(amount)
+    match = _re.match(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*(亿|万)?\s*(.*)$", raw)
+    if not match:
+        return f"{raw} {coin}".strip()
+    number = float(match.group(1))
+    unit = match.group(2) or ""
+    tail = match.group(3) or ""
+    coin = coin or tail
+    if unit:
+        return f"{_trim_number(number)} {unit} {coin}".strip()
+    if number >= 1e8:
+        return f"{_trim_number(number / 1e8)} 亿 {coin}".strip()
+    if number >= 1e4:
+        return f"{_trim_number(number / 1e4)} 万 {coin}".strip()
+    return f"{number:,.0f} {coin}".strip()
+
+
+def _product_tag_summary(value: Any, keyword: str) -> tuple[str, Dict[str, Any]]:
+    """Summarise upstream product tags while keeping the raw list in the record.
+
+    The upstream ``mainProducts`` field is an unordered tag set, not a verified
+    product catalogue; it often contains cross-industry tags. We keep the count,
+    keyword-bearing tags, and a bounded sample of other tags instead of dumping
+    the entire comma string into one table cell.
+    """
+    raw = _join_list(value) if isinstance(value, list) else _text(value)
+    parts: List[str] = []
+    seen = set()
+    for part in _re.split(r"[、,，;；]", raw):
+        tag = part.strip()
+        if tag and tag not in seen:
+            seen.add(tag)
+            parts.append(tag)
+    if not parts:
+        return "", {"total": 0, "hits": 0, "others": 0}
+    token = "".join(str(keyword or "").casefold().split())
+    hits = [p for p in parts if token and token in "".join(p.casefold().split())]
+    others = [p for p in parts if p not in hits]
+    summary = f"上游标签 {len(parts)} 项"
+    if hits:
+        summary += f"，含关键词 {len(hits)} 项：{'、'.join(hits[:8])}"
+    if others:
+        summary += f"；其他标签 {len(others)} 项，如 {'、'.join(others[:4])}"
+    if len(hits) > 8 or len(others) > 4:
+        summary += "…"
+    return summary, {"total": len(parts), "hits": len(hits), "others": len(others)}
 
 
 # --------------------------------------------------------------------------- #
@@ -489,7 +544,7 @@ def _sum_product_category_values(stats: Mapping[str, Any]) -> int:
     return total
 
 
-def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, Any], product_stats: Mapping[str, Any], search: Any) -> Dict[str, Any]:
+def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, Any], product_stats: Mapping[str, Any], search: Any, search_keyword: str = "") -> Dict[str, Any]:
     p = profile if isinstance(profile, dict) else {}
     c = capabilities if isinstance(capabilities, dict) else {}
     ps = product_stats if isinstance(product_stats, dict) else {}
@@ -580,14 +635,23 @@ def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, A
             if value:
                 address_values.append(value)
                 address_sources[f"factoryAddress.{key}"] = value
-        search_rows.append({
-            "企业名称": _text(item.get("name")) or "-",
-            "主营产品": _join_list(item.get("mainProducts")) or "-",
+        raw_products = _join_list(item.get("mainProducts")) or "-"
+        summary, tag_meta = _product_tag_summary(item.get("mainProducts"), search_keyword)
+        company_name = _text(item.get("name")) or "-"
+        name_token = "".join(str(search_keyword or "").casefold().split())
+        row = {
+            "企业名称": company_name,
+            "主营产品": summary or "-",
+            "主营产品原文": raw_products,
+            "主营标签统计": tag_meta,
+            "名称含关键词": "是" if name_token and name_token in "".join(company_name.casefold().split()) else "否",
             "注册资本": _reg_capital_text(item.get("regCapital")) or "-",
+            "注册资本原文": _text(item.get("regCapital")) or "-",
             "成立日期": _text(item.get("foundTime")) or "-",
             "地区/地址": _merge_address_parts(address_values) or "上游未返回（不可逐条复核）",
             "地址来源字段": address_sources,
-        })
+        }
+        search_rows.append(row)
 
     capability_kinds = _capability_kinds(capabilities_kv)
     if capability_kinds["production"]:
@@ -607,8 +671,8 @@ def build_core_analysis(profile: Mapping[str, Any], capabilities: Mapping[str, A
          "chart": {"name": "产品类目", "value": "数量"},
          "columns": [("产品类目", "产品类目"), ("数量", "数量")]},
         {"key": "search_records", "title": "工厂检索明细", "kind": "table",
-         "note": f"本次检索命中 {total if total is not None else '未知'} 条，展示前 {len(search_rows)} 条",
-         "columns": [("企业名称", "企业名称"), ("主营产品", "主营产品"), ("地区/地址", "地区/地址"), ("注册资本", "注册资本"), ("成立日期", "成立日期")]},
+         "note": f"本次检索命中 {total if total is not None else '未知'} 条，展示前 {len(search_rows)} 条；主营产品为上游标签摘要，原文保留在 JSON",
+         "columns": [("企业名称", "企业名称"), ("名称含关键词", "名称含关键词"), ("主营产品（标签摘要）", "主营产品"), ("地区/地址", "地区/地址"), ("注册资本", "注册资本"), ("成立日期", "成立日期")]},
     ]
 
     return {
@@ -643,7 +707,6 @@ def build_records(core: Mapping[str, Any]) -> List[Dict[str, Any]]:
         })
     return out[:20]
 
-
 def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]]) -> List[Dict[str, Any]]:
     insights: List[Dict[str, Any]] = []
     metric_map = {m["label"]: str(m["value"]) for m in metrics}
@@ -655,6 +718,15 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
                 "feature": "工厂检索本次采集样本",
                 "evidence": f"本次采集返回 {len(rows)} 条候选记录，其中 {auditable} 条含可逐条复核的地区/地址字段；请求地区={subject.get('address') or []}。",
                 "interpretation": "结果仅是上游按关键词与地区筛选的候选样本；缺少地址字段的记录不能在报告内独立复核地区，也不等同于已审核供应商。",
+            })
+            name_hits = sum(1 for row in rows if row.get("名称含关键词") == "是")
+            tag_only = sum(1 for row in rows if row.get("名称含关键词") == "否" and (row.get("主营标签统计") or {}).get("hits"))
+            tag_hit_rows = sum(1 for row in rows if (row.get("主营标签统计") or {}).get("hits"))
+            multi_tag_rows = sum(1 for row in rows if (row.get("主营标签统计") or {}).get("others"))
+            insights.append({
+                "feature": "名称与主营标签命中",
+                "evidence": f"本次展示 {len(rows)} 条中，企业名称含关键词 {name_hits} 条；主营标签含关键词 {tag_hit_rows} 条，其中仅靠标签命中的 {tag_only} 条；{multi_tag_rows} 条的标签含其他行业词。",
+                "interpretation": "名称含关键词不等于同一集团或同一工厂（可能存在“安吉”+“利奥”这类跨词组合）；主营标签是上游标签集合，含跨行业词，不能当主营产品清单或生产证明，需核对注册地、股权与产品证据。",
             })
         else:
             insights.append({
@@ -832,38 +904,41 @@ def build_dry_run_payload(raw: str, keyword_type: str) -> Dict[str, Any]:
     subject = {**subject, "match_raw": raw, "keywordType": keyword_type}
     core = sample.get("core_analysis") or {}
     metrics = sample.get("metrics") or []
-    return _assemble(subject, core, metrics, dry_run=True)
+    return apply_content_review(_assemble(subject, core, metrics, dry_run=True))
 
 
 # --------------------------------------------------------------------------- #
 # Assembly
 # --------------------------------------------------------------------------- #
 
+def _quality_report(core: Mapping[str, Any]) -> Dict[str, Any]:
+    """Section-fill rate from final declared sections and their actual bodies.
+
+    ``0`` is a populated body; None/''/[]/{} is empty. Not an accuracy score.
+    """
+    ca = core if isinstance(core, dict) else {}
+    sections = ca.get("sections")
+    if isinstance(sections, list):
+        total = len(sections)
+        populated = sum(1 for s in sections if isinstance(s, dict) and ca.get(s.get("key")) not in (None, "", [], {}))
+    else:
+        keys = [k for k in ca if k not in ("sections", "source_status")]
+        total = len(keys)
+        populated = sum(1 for k in keys if ca.get(k) not in (None, "", [], {}))
+    return {
+        "total_sections": total,
+        "populated_sections": populated,
+        "empty_sections": total - populated,
+        "coverage_pct": round(populated / max(1, total) * 100),
+    }
+
+
 def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]], *, dry_run: bool) -> Dict[str, Any]:
     abstract = build_abstract(subject, core, metrics)
     records = build_records(core)
     insights = build_insights(subject, core, metrics)
-    # Quality gate: count populated core-analysis sections.
-    ca = core if isinstance(core, dict) else {}
-    status_value = ca.get("source_status")
-    statuses: Dict[str, Any] = status_value if isinstance(status_value, dict) else {}
-    requested = [value for value in statuses.values() if value != "not_requested"]
-    secs = ca.get("sections", [])
-    if requested:
-        total_secs = len(requested)
-        populated = sum(1 for value in requested if value == "success")
-    elif secs:
-        total_secs = len(secs)
-        populated = sum(1 for s in secs if isinstance(s, dict) and ca.get(s.get("key")) not in (None, "", [], {}))
-    else:
-        total_secs = max(1, len([k for k in ca if k != "sections"]))
-        populated = sum(1 for k in ca if k != "sections" and ca.get(k) not in (None, "", [], {}))
-    quality_report = {
-        "total_sections": total_secs,
-        "populated_sections": populated,
-        "empty_sections": total_secs - populated,
-        "coverage_pct": round(populated / max(1, total_secs) * 100),
-    }
+    quality_report = _quality_report(core)
+    populated = quality_report["populated_sections"]
     if populated == 0:
         import sys
         print("⚠️ 质量门禁警告: 所有核心分析维度均无数据", file=sys.stderr)
@@ -915,7 +990,7 @@ def build_payload_enterprise(raw: str, keyword_type: str, page_size: int) -> Dic
                             capabilities if isinstance(capabilities, dict) else {},
                             product_stats if isinstance(product_stats, dict) else {},
                             None)
-    return _assemble(subject, core, metrics, dry_run=False)
+    return apply_content_review(_assemble(subject, core, metrics, dry_run=False))
 
 
 def _parse_addresses(address_args: List[str]) -> List[List[str]]:
@@ -958,7 +1033,7 @@ def build_payload_search(keyword: str, keyword_type: str, addresses: List[List[s
         "mode": "search",
         "address": addresses,
     }
-    core = build_core_analysis({}, {}, {}, search)
+    core = build_core_analysis({}, {}, {}, search, mk)
     core["source_status"].update({
         "factory_profile": "not_requested",
         "factory_capabilities": "not_requested",
@@ -968,7 +1043,112 @@ def build_payload_search(keyword: str, keyword_type: str, addresses: List[List[s
     # --- Enterprise profile enrichment (from fuzzy_search) ---
     _enrich_metrics_with_profile(metrics, resolved.get("record") if isinstance(resolved, dict) else None)
     _derive_core_metrics(metrics, core if isinstance(core, dict) else {})
-    return attach_pagination(_assemble(subject, core, metrics, dry_run=False), {"工厂检索": search})
+    report = apply_content_review(_assemble(subject, core, metrics, dry_run=False))
+    return attach_pagination(report, {"工厂检索": search})
+
+
+def _review_search_rows(rows: Sequence[Mapping[str, Any]], keyword: str) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    token = "".join(str(keyword or "").casefold().split())
+    for raw in rows:
+        if not isinstance(raw, dict):
+            continue
+        row = dict(raw)
+        raw_products = row.get("主营产品原文") or row.get("主营产品") or "-"
+        if isinstance(raw_products, list):
+            raw_products = _join_list(raw_products) or "-"
+        row["主营产品原文"] = raw_products
+        existing_summary = str(row.get("主营产品") or "")
+        existing_meta = row.get("主营标签统计")
+        if str(raw_products).strip() in ("", "-"):
+            summary, meta = "", {"total": 0, "hits": 0, "others": 0}
+        elif existing_summary.startswith("上游标签") and isinstance(existing_meta, dict):
+            # Already organised by the current normal generator or a prior
+            # review: keep its summary instead of re-tokenising it.
+            summary, meta = existing_summary, existing_meta
+        else:
+            summary, meta = _product_tag_summary(raw_products, keyword)
+        row["主营产品"] = summary or "-"
+        row["主营标签统计"] = meta
+        name = str(row.get("企业名称") or "")
+        row["名称含关键词"] = "是" if token and token in "".join(name.casefold().split()) else "否"
+        old_cap = str(row.get("注册资本") or "")
+        if old_cap and old_cap != "-" and "注册资本原文" not in row:
+            row["注册资本原文"] = old_cap
+            row["注册资本"] = _reg_capital_text(old_cap) or "-"
+        out.append(row)
+    return out
+
+
+def apply_content_review(report: Mapping[str, Any], *, source_sha256: Optional[str] = None,
+                         reviewed_at: Optional[str] = None) -> Dict[str, Any]:
+    """Rebuild factory-search narrative content offline from an existing payload.
+
+    Uses only fields already present (search records, metrics, subject). No MCP
+    call, no new facts. Fixes: raw upstream tag dumps presented as a product
+    catalogue, multi-decimal capital strings, and silent name/tag keyword hits
+    that made different companies look like the same subject.
+    """
+    out = copy.deepcopy(dict(report))
+    subject = dict(out.get("subject") or {})
+    ds = dict(out.get("data_source") or {})
+    keyword = str(subject.get("search_keyword") or subject.get("match_raw") or subject.get("matchKeyword") or "")
+    core = dict(out.get("core_analysis") or {})
+    core["search_records"] = _review_search_rows(core.get("search_records") or [], keyword)
+    sections = []
+    for spec in core.get("sections") or []:
+        if isinstance(spec, dict) and spec.get("key") == "search_records":
+            spec = dict(spec)
+            spec["columns"] = [("企业名称", "企业名称"), ("名称含关键词", "名称含关键词"),
+                               ("主营产品（标签摘要）", "主营产品"), ("地区/地址", "地区/地址"),
+                               ("注册资本", "注册资本"), ("成立日期", "成立日期")]
+            note = str(spec.get("note") or "")
+            if "主营产品为上游标签摘要" not in note:
+                spec["note"] = note + "；主营产品为上游标签摘要，原文保留在 JSON"
+        sections.append(spec)
+    core["sections"] = sections
+    metrics = list(out.get("metrics") or [])
+    quality = _quality_report(core)
+    if quality["populated_sections"] == 0:
+        # No business body: keep the assembled empty/failure narrative instead
+        # of replacing it with a generic abstract that implies sections exist.
+        out["core_analysis"] = core
+        out["metrics"] = metrics
+        ds["quality_report"] = quality
+        ds["content_revision"] = {
+            "mode": "offline_source_preserving",
+            "source_sha256": source_sha256,
+            "original_generated_at": ds.get("generated_at"),
+            "reviewed_at": reviewed_at or dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+            "scope": "无有效业务章节：保留原始空结果或调用失败说明，不生成业务结论",
+        }
+        out["data_source"] = ds
+        return out
+    insights = build_insights(subject, core, metrics)
+    abstract = build_abstract(subject, core, metrics)
+    old_abstract = str(out.get("abstract") or "")
+    marker = "明细含未完整采集的来源"
+    if marker in old_abstract:
+        # attach_pagination() appends this disclosure after the review; keep it
+        # when an already-attached report is reviewed again offline.
+        abstract += old_abstract[old_abstract.index(marker):]
+    out["core_analysis"] = core
+    out["metrics"] = metrics
+    out["insights"] = insights
+    out["abstract"] = abstract
+    out["summary"] = abstract
+    out["executive_summary"] = [i.get("interpretation") for i in insights][:5] or [abstract[:120]]
+    out["representative_records"] = build_records(core)
+    ds["quality_report"] = _quality_report(core)
+    ds["content_revision"] = {
+        "mode": "offline_source_preserving",
+        "source_sha256": source_sha256,
+        "original_generated_at": ds.get("generated_at"),
+        "reviewed_at": reviewed_at or dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+        "scope": "标签摘要化并保留原文；规范注册资本展示；标注名称/标签命中；未新增查询",
+    }
+    out["data_source"] = ds
+    return out
 
 
 def build_payload(raw: str, keyword_type: str, page_size: int, *, mode: str, addresses: List[List[str]], max_pages: int = 1) -> Dict[str, Any]:
