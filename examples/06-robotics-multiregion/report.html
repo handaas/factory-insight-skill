@@ -37,6 +37,7 @@
     .biz-metric .m-tag.t-down { color:#dc2626; }
     .biz-metric .m-tag.t-neutral { color:#6366f1; }
     .biz-metric .m-value { color:#0b3768; font-size:26px; line-height:1.1; font-weight:900; letter-spacing:-.02em; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; margin-top:auto; }
+    .biz-metric .m-hint { color:#64748b; font-size:11px; line-height:1.5; margin-top:6px; text-align:left; }
     .biz-metric .m-value .m-tag.t-up { color:#16a34a; }
     .biz-metric .m-value .m-tag.t-down { color:#dc2626; }
     .biz-metric .m-value .m-tag.t-neutral { color:#6366f1; }
@@ -218,8 +219,10 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
   var status=window.__handaas_chart_status={state:'waiting',total:0,ready:0,failed:0};
   var timer=null, retries=0, MAX_RETRIES=100;
   var layoutRetries=0, MAX_LAYOUT_RETRIES=50;
-  var PALETTE=['#0b5ca8','#0284c7','#0b3768','#d97706','#059669','#dc2626','#7c3aed','#db2777','#0891b2','#65a30d'];
-  var FONTS='-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif';
+  var MSG_LOADING='图表库正在加载，数据明细仍可查看。';
+  var MSG_MISSING='图表交互不可用，已保留静态图表，数据明细仍可查看。';
+  var MSG_LAYOUT='图表等待布局完成后渲染，数据明细仍可查看。';
+  var MSG_FAILED='图表交互初始化失败，已保留静态图表，数据明细仍可查看。';
   function summarize(nodes){
     status.total=nodes.length;status.ready=0;status.failed=0;
     nodes.forEach(function(el){
@@ -229,18 +232,40 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
     status.state=status.ready===status.total?'ready':
       (status.ready+status.failed===status.total?(status.ready?'degraded':'error'):'waiting');
   }
+  function frameOf(el){
+    var p=el.parentElement;
+    if(p&&(' '+p.className+' ').indexOf(' chart-frame ')>-1){return p;}
+    return null;
+  }
+  function setStatus(el,msg){
+    var f=frameOf(el);
+    if(f){
+      var p=f.querySelector('.chart-status');
+      if(p){p.textContent=msg;}
+    }else{
+      el.textContent=msg;
+    }
+  }
   function raf(fn){if(window.requestAnimationFrame){window.requestAnimationFrame(fn);}else{fn();}}
+  function hasGeometry(chart,el){
+    if(!chart || chart.getWidth()<2 || chart.getHeight()<2){return false;}
+    var svg=el.querySelector('svg');
+    if(!svg){return false;}
+    return !!svg.querySelector('path,rect,circle,line,text,polygon,polyline');
+  }
   function boot(){
     if(document.readyState==='loading'){return;}
     var nodes=document.querySelectorAll('.chart-canvas');
     if(!nodes.length){summarize(nodes);return;}
-    if(!window.echarts || typeof window.echarts.init!=='function'){
+    if(!window.echarts || typeof window.echarts.init!=='function' || typeof window.handaasChartOption!=='function'){
       var exhausted=retries>=MAX_RETRIES;
       nodes.forEach(function(el){
         if(el.__handaas_chart_ready){return;}
         el.__handaas_dependency_error=true;
         el.setAttribute('data-chart-state',exhausted?'error':'waiting');
-        el.textContent=exhausted?'图表库加载失败或不可用，请查看数据明细或重新生成离线报告。':'图表库正在加载，数据明细仍可查看。';
+        setStatus(el,exhausted?MSG_MISSING:MSG_LOADING);
+        var f=frameOf(el);
+        if(f){f.setAttribute('data-chart-state',exhausted?'error':'static');}
       });
       summarize(nodes);
       if(!exhausted && timer===null){
@@ -253,6 +278,7 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
     var pendingLayout=0;
     nodes.forEach(function(el){
       if(el.__handaas_chart_ready){return;}
+      var f=frameOf(el);
       if(el.getAttribute('data-chart-state')==='error' && !el.__handaas_dependency_error){return;}
       if(window.ResizeObserver && !el.__handaas_resize_observer){
         el.__handaas_resize_observer=new ResizeObserver(function(){
@@ -264,7 +290,8 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
       }
       if((el.getClientRects && el.getClientRects().length===0) || el.clientWidth<2 || el.clientHeight<2){
         el.setAttribute('data-chart-state','waiting');
-        el.textContent='图表等待布局完成后渲染，数据明细仍可查看。';
+        setStatus(el,MSG_LAYOUT);
+        if(f){f.setAttribute('data-chart-state','static');}
         pendingLayout++;
         return;
       }
@@ -274,46 +301,36 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
         if(!raw){throw new Error('Missing chart configuration');}
         // getAttribute already decodes HTML entities; a second decode corrupts labels.
         var spec=JSON.parse(raw);
-        if(['line','bar','pie','gauge','radar'].indexOf(spec.type)<0){throw new Error('Unsupported chart type');}
+        var opt=window.handaasChartOption(spec);
+        if(!opt){throw new Error('Unsupported chart type');}
         el.textContent='';
         chart=window.echarts.init(el,null,{renderer:'svg'});
-      var opt={color:PALETTE,tooltip:{trigger: spec.type==='pie'?'item':'axis'},textStyle:{fontFamily:FONTS,fontSize:12,color:'#334155'},grid:{left:48,right:24,top:30,bottom:40},legend:{top:0,textStyle:{fontSize:11}}};
-      if(spec.type==='line'){
-        opt.xAxis={type:'category',data:spec.x,axisLabel:{fontSize:11,interval:0,rotate: spec.x && spec.x.length>6?35:0}};
-        opt.yAxis={type:'value'};
-        opt.series=spec.series.map(function(s){return{name:s.name,type:'line',smooth:true,areaStyle: spec.area?{opacity:0.18}:undefined,stack: spec.stack?s.name:undefined,data:s.data,label:{show:true,position:'top',fontSize:11}};});
-        if(spec.stack){opt.tooltip={trigger:'axis'};}
-      }else if(spec.type==='bar'){
-        var horiz=spec.orient==='h';
-        var cats=spec.names, vals=spec.values;
-        if(horiz){opt.yAxis={type:'category',data:cats,axisLabel:{fontSize:11}};opt.xAxis={type:'value'};opt.grid={left:120,right:30,top:20,bottom:30};}
-        else{opt.xAxis={type:'category',data:cats,axisLabel:{fontSize:11,interval:0,rotate: cats&&cats.length>6?35:0}};opt.yAxis={type:'value'};}
-        opt.series=[{type:'bar',data:vals,itemStyle:{color:PALETTE[0]},label:{show:true,position: horiz?'right':'top',fontSize:11},barMaxWidth:42}];
-        opt.tooltip={trigger:'axis',axisPointer:{type:'shadow'}};
-      }else if(spec.type==='pie'){
-        opt.series=[{type:'pie',radius: spec.donut?['42%','68%']:'68%',center:['50%','55%'],data:spec.data,itemStyle:{borderColor:'#fff',borderWidth:2},label:{fontSize:11,formatter:'{b}: {c} ({d}%)'}}];
-        opt.legend={bottom:0,textStyle:{fontSize:11}};
-        opt.tooltip={trigger:'item',formatter:'{b}: {c} ({d}%)'};
-      }else if(spec.type==='gauge'){
-        var v=spec.value, mx=spec.max||100;
-        var col=v/mx>0.66?'#dc2626':(v/mx>0.33?'#d97706':'#059669');
-        opt.series=[{type:'gauge',min:0,max:mx,progress:{show:true,width:14,itemStyle:{color:col}},axisLine:{lineStyle:{width:14}},axisTick:{show:false},splitLine:{length:8,lineStyle:{color:'#fff'}},pointer:{width:5},detail:{valueAnimation:true,formatter:'{value}',fontSize:28,color:col,offsetCenter:[0,'30%']},data:[{value:v,name:spec.level||''}],title:{fontSize:13,color:'#475569',offsetCenter:[0,'62%']}}];
-      }else if(spec.type==='radar'){
-        opt.radar={indicator:spec.indicators,radius:'62%',axisName:{color:'#475569',fontSize:11},splitArea:{areaStyle:{color:['#f8fbff','#eef4fb']}}};
-        opt.series=[{type:'radar',areaStyle:{opacity:0.18},data:spec.series}];
-      }
         chart.setOption(opt);
+        // Real synchronous flush: setOption already flushes internally, but
+        // drive the zrender painter once more before the geometry gate. Any
+        // throw here falls into catch and keeps the static SVG.
+        var zr=chart.getZr();
+        if(zr && typeof zr.flush==='function'){zr.flush();}
+        // Never reveal the interactive layer (and never hide the static SVG)
+        // before real SVG geometry exists on the canvas overlay.
+        if(!hasGeometry(chart,el)){throw new Error('Empty chart geometry');}
         el.__handaas_chart=chart;
         el.__handaas_chart_ready=true;
         el.__handaas_dependency_error=false;
         el.setAttribute('data-chart-state','ready');
         window.__echarts_instances.push(chart);
+        if(f){
+          f.setAttribute('data-chart-state','ready');
+          var p=f.querySelector('.chart-status');
+          if(p){p.textContent='';}
+        }
         raf(function(){try{chart.resize();}catch(ignored){}});
       }catch(e){
         if(chart && typeof chart.dispose==='function'){try{chart.dispose();}catch(ignored){}}
         el.__handaas_dependency_error=false;
         el.setAttribute('data-chart-state','error');
-        el.textContent='图表绘制失败，请查看数据明细。';
+        setStatus(el,MSG_FAILED);
+        if(f){f.setAttribute('data-chart-state','error');}
       }
     });
     summarize(nodes);
@@ -363,10 +380,10 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
         <h1>工业机器人 工厂检索样本报告</h1>
         <p class="report-lead">本报告以“工业机器人”为工厂检索关键词，按 keywordType=综合搜索、地区=[[&#x27;广东省&#x27;], [&#x27;江苏省&#x27;, &#x27;苏州市&#x27;]] 查询。当前页候选样本 10 条；只呈现检索记录与可复核字段，不声称已获得企业工厂概况、产能或产品统计</p>
         <div class="abstract-box">报告涵盖查询对象、数据总览、核心分析、代表性记录与结构洞察，所有数据均标注口径与来源。</div>
-        <div class="biz-metrics"><div class="biz-metric"><span class="m-name">检索结果</span><span class="m-tag"></span><span class="m-value">11160</span></div><div class="biz-metric"><span class="m-name">工厂检索当前页样本</span><span class="m-tag"></span><span class="m-value">10 条</span></div><div class="biz-metric-empty"></div><div class="biz-metric-empty"></div></div>
+        <div class="biz-metrics"><div class="biz-metric"><span class="m-name">检索结果</span><span class="m-tag"></span><span class="m-value">11160</span><span class="m-hint">工厂检索命中数</span></div><div class="biz-metric-empty"></div><div class="biz-metric-empty"></div><div class="biz-metric-empty"></div></div>
         <ul class="exec-list"><li>结果仅是上游按关键词与地区筛选的候选样本；缺少地址字段的记录不能在报告内独立复核地区，也不等同于已审核供应商。</li></ul>
         <div class="cover-findings"><h3 class="cover-findings-title">核心发现</h3><div class="cover-findings-grid"><div class="finding-card"><p class="f-label">工厂检索当前页样本</p><p class="f-text">当前页返回 10 条候选记录，其中 0 条含可逐条复核的地区/地址字段；请求地区=[[&#x27;广东省&#x27;], [&#x27;江苏省&#x27;, &#x27;苏州市&#x27;]]。</p></div></div></div>
-        <div class="cover-dimensions"><span class="dim-label">分析维度</span><div class="dim-tags"><span class="dim-tag">工厂概况</span><span class="dim-tag">平台身份信息线索</span><span class="dim-tag">工厂产品类目分布</span><span class="dim-tag">工厂检索明细</span></div></div>
+        <div class="cover-dimensions"><span class="dim-label">分析维度</span><div class="dim-tags"><span class="dim-tag">工厂检索明细</span></div></div>
         <div class="cover-scope-bar"><span class="scope-item"><em>数据产品</em>工厂检索</span><span class="scope-item"><em>覆盖范围</em>工厂检索当前页候选样本</span></div>
       </section>
     </div>
@@ -374,7 +391,7 @@ var Fr={},Gr={};var Wr,Hr=function(){function t(t,e,n){var i=this;this._sleepAft
   <main class="research-doc">
     <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">工厂信息分析报告</div></div><div class="biz-section-head"><div><h2>报告摘要</h2><p class="biz-section-note">概述分析对象、数据覆盖范围与核心发现。</p></div><span class="biz-tag">Summary</span></div><p class="biz-summary">本报告以“工业机器人”为工厂检索关键词，按 keywordType=综合搜索、地区=[[&#x27;广东省&#x27;], [&#x27;江苏省&#x27;, &#x27;苏州市&#x27;]] 查询。当前页候选样本 10 条；只呈现检索记录与可复核字段，不声称已获得企业工厂概况、产能或产品统计</p></section>
     <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">工厂信息分析报告</div></div><div class="biz-section-head"><div><h2>查询对象与口径</h2><p class="biz-section-note">说明匹配对象、匹配方式与数据范围。</p></div><span class="biz-tag">Caliber</span></div><div class="info-list"><div class="info-row"><span class="info-label">匹配对象</span><span class="info-value">工业机器人</span></div><div class="info-row"><span class="info-label">匹配方式</span><span class="info-value">工厂检索模式（keywordType=综合搜索，address=[[&#x27;广东省&#x27;], [&#x27;江苏省&#x27;, &#x27;苏州市&#x27;]]）</span></div><div class="info-row"><span class="info-label">数据范围</span><span class="info-value">工厂检索当前页候选样本</span></div><div class="info-row"><span class="info-label">局限说明</span><span class="info-value">地区条件由上游执行；若单条记录未返回地区/地址字段，报告会明确标注不可逐条独立复核。检索结果不等同于已审核供应商。</span></div></div></section>
-    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">工厂信息分析报告</div></div><div class="biz-section-head"><div><h2>数据总览</h2><p class="biz-section-note">关键指标一览。</p></div><span class="biz-tag">Metrics</span></div><div class="biz-metrics"><div class="biz-metric"><span class="m-name">检索结果</span><span class="m-tag"></span><span class="m-value">11160</span></div><div class="biz-metric"><span class="m-name">工厂检索当前页样本</span><span class="m-tag"></span><span class="m-value">10 条</span></div><div class="biz-metric-empty"></div><div class="biz-metric-empty"></div></div></section>
+    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">工厂信息分析报告</div></div><div class="biz-section-head"><div><h2>数据总览</h2><p class="biz-section-note">关键指标一览。</p></div><span class="biz-tag">Metrics</span></div><div class="biz-metrics"><div class="biz-metric"><span class="m-name">检索结果</span><span class="m-tag"></span><span class="m-value">11160</span><span class="m-hint">工厂检索命中数</span></div><div class="biz-metric-empty"></div><div class="biz-metric-empty"></div><div class="biz-metric-empty"></div></div></section>
     <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">工厂信息分析报告</div></div><div class="biz-section-head"><div><h2>核心分析</h2><p class="biz-section-note">按维度展开目标核心数据与结构化明细。</p></div><span class="biz-tag">Analysis</span></div><h3 class="biz-subsection-title">工厂检索明细</h3><p class="biz-section-note">本次检索命中 11160 条，展示前 10 条</p><div class="table-wrap"><table><thead><tr><th>企业名称</th><th>主营产品</th><th>地区/地址</th><th>注册资本</th><th>成立日期</th></tr></thead><tbody><tr><td>广东拓斯达科技股份有限公司</td><td>粉碎机、CNC上下料机器人、五金模具机械、关节型机器人、冲压机自动化解决方案、机电工程、塑机辅机、咨询、自动化控制系统软、中央供料系统、CNC智能数控装备、混料机、吸料机、冰水机、惠企机械手、粉碎回收等塑胶机械设备、组装自动化解决方案、混合计量、制冷设备、水电器系统、焊接自动化解决方案、医疗产品组装线、无尘室、自动化设备及自动供料、工业机器人、计量机、除湿干燥、模温机、模具监视器、打印设备、除湿干燥机、打印设备耗材等橡胶制品、机械手等智能装备、压铸自动化解决方案、塑料制品、无尘车间、注塑机、机械手、硬件</td><td>上游未返回（不可逐条复核）</td><td>476972412.0 人民币</td><td>2007-06-01</td></tr><tr><td>广州数控设备有限公司</td><td>主轴电机、机床数控化改造、金属切削机床、伺服驱动器、全自动注塑机、配电或控制设备零件、图示仪、太阳能源、关节型机器人、工业自动控制系统装置、机械工业、试验台、铣床、组合机床、全电动注塑机、数控车床、视频分配器、车床、机床数控、交流伺服驱动系统、弧焊机、钻铣床、各地名优数控机床、电子、自动化控制、焊接机器人、格栅灯、数控加工中心、中心数控系统、电机、售后服务、机床、GSK系列数控系统、五金、数控磨床、市政和环境卫生机械、电器辅件、设备、机械、主轴伺服电动机、数控系统交流伺服系统、国产数控车床、普通机床数控化改造、交流伺服系统、剥线机、工业机器人、单轴控制器、GSK系列车床、机器人、GSK数控系统、交流伺服系统及电机、全数字式交流伺服驱动装置、GSK系列多轴车铣冲磨加工中心、普通机床、伺服电机驱动器、CT-L数控滑台、数控钻铣床、电脑锣、普通车床、伺服电机、系统、中心、多功能控制器、注塑机、数控系统、教学设备、主轴驱动器、数控注塑机、步进电机驱动器、数控滑台改造、数控铣床、交流、GSK系列数控车床、广数系统、电饭煲、电饭锅、步进驱动器、国内名优数控机床、普通车床数控化改造、电机驱动器、数控机床</td><td>上游未返回（不可逐条复核）</td><td>10000000.0 人民币</td><td>1991-04-08</td></tr><tr><td>广州协鸿工业机器人技术有限公司</td><td>自动化设备、机器人本体、机器人系统集成、工业机器人、工装夹具、机器人手爪、导轨、手爪、视觉系统</td><td>上游未返回（不可逐条复核）</td><td>5000000.0 人民币</td><td>2012-07-02</td></tr><tr><td>广州启帆工业机器人有限公司</td><td>压铸机器人、四六轴关节机器人、喷涂机器人、打磨抛光机器人、焊接机器人、冲压机器人、工业机器人、自动喷涂机器人、自动搬运码垛机器人、压铸喷涂机器人、搬运机器人</td><td>上游未返回（不可逐条复核）</td><td>28623200.0 人民币</td><td>2014-03-20</td></tr><tr><td>东莞市功成工业机器人发展有限公司</td><td>塑胶原材料、五金塑胶制品、工业机器人、工业机器人软件、金属</td><td>上游未返回（不可逐条复核）</td><td>10000000.0 人民币</td><td>2016-03-31</td></tr><tr><td>深圳启舜工业机器人有限公司</td><td>机械零部件的研发、工业电缆、自动化设备、工业机器人、冲压自动化、五金自动化、自动化周边设备、机械设备、冲压机械手</td><td>上游未返回（不可逐条复核）</td><td>100000.0 人民币</td><td>2016-06-12</td></tr><tr><td>广州科敏达工业机器人有限公司</td><td>冲床连线多工程机械手、机械配件、工控系统及装备、电子工业设备、电工电气、工业机器人、助力机械手、电气设备、金属制品、电子产品、冲压自动设备、金属日用杂品、单台冲床多工程机械手、NC 二次元送装置</td><td>上游未返回（不可逐条复核）</td><td>8000000.0 人民币</td><td>2012-01-17</td></tr><tr><td>东莞市钰海工业机器人科技有限公司</td><td>塑胶制品、自动化设备、机械手、工业机器人、五金制品</td><td>上游未返回（不可逐条复核）</td><td>2000000.0 人民币</td><td>2016-02-25</td></tr><tr><td>苏州启昌工业机器人有限公司</td><td>机械设备、机械零部件、工业机器人</td><td>上游未返回（不可逐条复核）</td><td>1000000.0 人民币</td><td>2015-07-27</td></tr><tr><td>深圳众为兴技术股份有限公司</td><td>自动点胶数控系统、伺服驱动器、数控系统应用、多轴运动控制卡、伺服系统、多轴运动控制卡运动控制器总汇车铣床数控系统、封切机控制系统、机器视觉、伺服步进、喷涂机控制系统、火焰、直流伺服驱动、水钻设备、运动控制器汇总、剪板折弯机控制系统、编码器、人机界面、CNC数控系统、运动控制器、视觉系统、运动控制卡、数控应用系统、车/铣床数控系统、步进电机、数控设备、步进、电机、运动控制系统、激光切割机控制系统、驱动器、步进电机驱动、步进伺服电机、车床系统、PCB插座、控制器、水钻机系统、独立控制器、雕刻机控制系统、家具五金、多轴运动控制器、数控装置、切割机控制系统、弹簧机控制系统、步进伺服单元、多轴数控车铣床系统、数控应用控制系统、工业机器人、激光打标机控制系统、商标印刷机控制系统、机器人、植毛钻孔机控制系统、点胶机控制系统、工控系统、伺服控制系统、伺服电机驱动器、机器视觉系统、伺服电机、绕线机控制系统、电脑多针绗缝机数控系统、数控系统、机械手、焊接机控制系统、步进电机驱动器、离子切割、点胶滴塑机、冲孔机控制系统、电动机、印刷线路板、步进驱动器、铣床系统、冲床伺服送料控制系统、伺服电机交流伺服驱动器、铣床数控系统、控制卡</td><td>上游未返回（不可逐条复核）</td><td>80000000.0 人民币</td><td>2002-08-13</td></tr></tbody></table></div></section>
     <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">工厂信息分析报告</div></div><div class="biz-section-head"><div><h2>代表性记录</h2><p class="biz-section-note">关键明细记录 Top N。</p></div><span class="biz-tag">Records</span></div><div class="table-wrap"><table><thead><tr><th>企业名称</th><th>主营产品</th><th>注册资本</th><th>成立日期</th><th>地区/地址</th></tr></thead><tbody><tr><td>广东拓斯达科技股份有限公司</td><td>粉碎机、CNC上下料机器人、五金模具机械、关节型机器人、冲压机自动化解决方案、机电工程、塑机辅机、咨询、自动化控制系统软、中央供料系统、CNC智能数控装备、混料机、吸料机、冰水机、惠企机械手、粉碎回收等塑胶机械设备、组装自动化解决方案、混合计量、制冷设备、水电器系统、焊接自动化解决方案、医疗产品组装线、无尘室、自动化设备及自动供料、工业机器人、计量机、除湿干燥、模温机、模具监视器、打印设备、除湿干燥机、打印设备耗材等橡胶制品、机械手等智能装备、压铸自动化解决方案、塑料制品、无尘车间、注塑机、机械手、硬件</td><td>476972412.0 人民币</td><td>2007-06-01</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>广州数控设备有限公司</td><td>主轴电机、机床数控化改造、金属切削机床、伺服驱动器、全自动注塑机、配电或控制设备零件、图示仪、太阳能源、关节型机器人、工业自动控制系统装置、机械工业、试验台、铣床、组合机床、全电动注塑机、数控车床、视频分配器、车床、机床数控、交流伺服驱动系统、弧焊机、钻铣床、各地名优数控机床、电子、自动化控制、焊接机器人、格栅灯、数控加工中心、中心数控系统、电机、售后服务、机床、GSK系列数控系统、五金、数控磨床、市政和环境卫生机械、电器辅件、设备、机械、主轴伺服电动机、数控系统交流伺服系统、国产数控车床、普通机床数控化改造、交流伺服系统、剥线机、工业机器人、单轴控制器、GSK系列车床、机器人、GSK数控系统、交流伺服系统及电机、全数字式交流伺服驱动装置、GSK系列多轴车铣冲磨加工中心、普通机床、伺服电机驱动器、CT-L数控滑台、数控钻铣床、电脑锣、普通车床、伺服电机、系统、中心、多功能控制器、注塑机、数控系统、教学设备、主轴驱动器、数控注塑机、步进电机驱动器、数控滑台改造、数控铣床、交流、GSK系列数控车床、广数系统、电饭煲、电饭锅、步进驱动器、国内名优数控机床、普通车床数控化改造、电机驱动器、数控机床</td><td>10000000.0 人民币</td><td>1991-04-08</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>广州协鸿工业机器人技术有限公司</td><td>自动化设备、机器人本体、机器人系统集成、工业机器人、工装夹具、机器人手爪、导轨、手爪、视觉系统</td><td>5000000.0 人民币</td><td>2012-07-02</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>广州启帆工业机器人有限公司</td><td>压铸机器人、四六轴关节机器人、喷涂机器人、打磨抛光机器人、焊接机器人、冲压机器人、工业机器人、自动喷涂机器人、自动搬运码垛机器人、压铸喷涂机器人、搬运机器人</td><td>28623200.0 人民币</td><td>2014-03-20</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>东莞市功成工业机器人发展有限公司</td><td>塑胶原材料、五金塑胶制品、工业机器人、工业机器人软件、金属</td><td>10000000.0 人民币</td><td>2016-03-31</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>深圳启舜工业机器人有限公司</td><td>机械零部件的研发、工业电缆、自动化设备、工业机器人、冲压自动化、五金自动化、自动化周边设备、机械设备、冲压机械手</td><td>100000.0 人民币</td><td>2016-06-12</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>广州科敏达工业机器人有限公司</td><td>冲床连线多工程机械手、机械配件、工控系统及装备、电子工业设备、电工电气、工业机器人、助力机械手、电气设备、金属制品、电子产品、冲压自动设备、金属日用杂品、单台冲床多工程机械手、NC 二次元送装置</td><td>8000000.0 人民币</td><td>2012-01-17</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>东莞市钰海工业机器人科技有限公司</td><td>塑胶制品、自动化设备、机械手、工业机器人、五金制品</td><td>2000000.0 人民币</td><td>2016-02-25</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>苏州启昌工业机器人有限公司</td><td>机械设备、机械零部件、工业机器人</td><td>1000000.0 人民币</td><td>2015-07-27</td><td>上游未返回（不可逐条复核）</td></tr><tr><td>深圳众为兴技术股份有限公司</td><td>自动点胶数控系统、伺服驱动器、数控系统应用、多轴运动控制卡、伺服系统、多轴运动控制卡运动控制器总汇车铣床数控系统、封切机控制系统、机器视觉、伺服步进、喷涂机控制系统、火焰、直流伺服驱动、水钻设备、运动控制器汇总、剪板折弯机控制系统、编码器、人机界面、CNC数控系统、运动控制器、视觉系统、运动控制卡、数控应用系统、车/铣床数控系统、步进电机、数控设备、步进、电机、运动控制系统、激光切割机控制系统、驱动器、步进电机驱动、步进伺服电机、车床系统、PCB插座、控制器、水钻机系统、独立控制器、雕刻机控制系统、家具五金、多轴运动控制器、数控装置、切割机控制系统、弹簧机控制系统、步进伺服单元、多轴数控车铣床系统、数控应用控制系统、工业机器人、激光打标机控制系统、商标印刷机控制系统、机器人、植毛钻孔机控制系统、点胶机控制系统、工控系统、伺服控制系统、伺服电机驱动器、机器视觉系统、伺服电机、绕线机控制系统、电脑多针绗缝机数控系统、数控系统、机械手、焊接机控制系统、步进电机驱动器、离子切割、点胶滴塑机、冲孔机控制系统、电动机、印刷线路板、步进驱动器、铣床系统、冲床伺服送料控制系统、伺服电机交流伺服驱动器、铣床数控系统、控制卡</td><td>80000000.0 人民币</td><td>2002-08-13</td><td>上游未返回（不可逐条复核）</td></tr></tbody></table></div></section>
     <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">工厂信息分析报告</div></div><div class="biz-section-head"><div><h2>特征与洞察</h2><p class="biz-section-note">基于数据的结构化解读。</p></div><span class="biz-tag">Insights</span></div><div class="structural-feature-grid"><article class="structural-feature-card">
